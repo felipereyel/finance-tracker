@@ -1,3 +1,3 @@
-# Vue 3 + TypeScript + Vite + Vue Router
+# Finance Tracker
 
-Template repo
+pocket base as backend and vue as frontend

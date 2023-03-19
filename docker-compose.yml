@@ -1,0 +1,14 @@
+version: '3.3'
+
+services:
+  server:
+    container_name: finance-tracker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./pb_data:/pb_data
+    env_file:
+      - .env
