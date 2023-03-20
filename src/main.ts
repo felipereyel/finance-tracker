@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
+import PrimeVue from "primevue/config";
 
 import "./style.css";
 import App from "./App.vue";
@@ -21,11 +22,21 @@ const router = createRouter({
       component: () => import("./views/About.vue"),
     },
     {
-      name: "noteEditor",
-      path: "/notes/:id",
-      component: () => import("./views/NoteEditor.vue"),
+      name: "asset",
+      path: "/assets/:id",
+      component: () => import("./views/Asset.vue"),
+    },
+    {
+      name: "new-asset-price",
+      path: "/assets/:id/new-price",
+      component: () => import("./views/NewAssetPrice.vue"),
+    },
+    {
+      name: "new-asset",
+      path: "/new-asset",
+      component: () => import("./views/NewAsset.vue"),
     },
   ],
 });
 
-createApp(App).use(router).mount("#app");
+createApp(App).use(router).use(PrimeVue).mount("#app");

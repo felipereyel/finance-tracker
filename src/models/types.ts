@@ -1,20 +1,57 @@
+type AssetTypeEnum = "fii" | "federal_bond" | "cdb" | "hedge_fund" | "other";
+
 type Metadata = {
-  notes: {
+  assets: {
     insert: {
       id?: string;
-      title?: string;
-      content?: string;
+      name: string;
+      type: AssetTypeEnum;
+      initial_price: number;
+      buy_date: string;
+      sell_date?: string;
+      comment?: string;
     };
     update: {
-      title?: string;
-      content?: string;
+      name?: string;
+      comment?: string;
+      sell_date?: string | null;
     };
     select: {
       id: string;
-      title: string;
-      content: string;
       created: string;
       updated: string;
+      name: string;
+      type: AssetTypeEnum;
+      initial_price: number;
+      buy_date: string;
+      sell_date?: string | null;
+      comment?: string;
+    };
+  };
+  asset_prices: {
+    insert: {
+      id?: string;
+      asset_id: string;
+      value: number;
+      logged_at: string;
+      gain: number;
+      comment?: string;
+    };
+    update: {
+      value?: number;
+      logged_at?: string;
+      gain?: number;
+      comment?: string;
+    };
+    select: {
+      id: string;
+      created: string;
+      updated: string;
+      asset_id: string;
+      value: number;
+      logged_at: string;
+      gain: number;
+      comment?: string;
     };
   };
 };
