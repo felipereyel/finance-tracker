@@ -53,7 +53,7 @@ const createAsset = async () => {
   }
 };
 
-const assetTypeOption = ['fii', 'federal_bond', 'cdb', 'hedge_fund', 'other'];
+const assetTypeOption = ['fii', 'federal_bond', 'cdb', 'hedge_fund', 'stock', 'other'];
 </script>
 
 <style scoped>
