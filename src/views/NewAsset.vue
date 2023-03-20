@@ -44,6 +44,7 @@ const createAsset = async () => {
       asset_id: asset.id,
       value: asset.initialPrice,
       logged_at: asset.buy_date,
+      comment: 'Initial Price',
       gain: 0,
     });
     router.push({ name: 'asset', params: { id: asset.id } });
