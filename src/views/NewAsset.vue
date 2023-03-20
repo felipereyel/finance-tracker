@@ -31,7 +31,7 @@ const router = useRouter();
 
 const state = ref({
   newAsset: { 
-    name: "New Price", 
+    name: "New Asset", 
     initial_price: 0, 
     buy_date: now() 
   } as AssetCreateDTO,
