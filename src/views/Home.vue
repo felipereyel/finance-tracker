@@ -3,27 +3,57 @@
   <div v-if="loading">
     <h2>Loading...</h2>
   </div>
-  <div v-else>
-    <ul>
-      <li v-for="note in assets" :key="note.id">
-        <router-link :to="{ name: 'asset', params: { id: note.id } }">
-          {{ note.name }}
-        </router-link>
-      </li>
-    </ul>
+  <div v-else-if="sections">
+    <div v-for="section in sections" :key="section.type">
+      <div class="section-head">
+        <h2>{{ section.type }}</h2>
+        <button @click="createAsset(section.type)">Create {{ section.type }}</button>
+      </div>
+      <DataTable :value="section.assets" tableStyle="min-width: 50rem" @row-click="goToAsset">
+        <Column field="name" header="Name"></Column>
+        <Column field="initialPrice" header="Buy Price">
+          <template #body="{ data }">
+            {{ formatCurrencyBRL(data.initialPrice) }}
+          </template>
+        </Column>
+        <Column field="buy_date" header="Buy Date">
+          <template #body="{ data }">
+            {{ formatDate(data.buy_date) }}
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
-  <button @click="createAsset">Create Asset</button>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { AssetModel } from '../models';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import { AssetModel, assetTypeOptions } from '../models';
 import { asyncComputed } from '../utils/vue';
+import { formatDate } from '../utils/date';
+import { formatCurrencyBRL } from '../utils/currency';
+import { computed } from 'vue';
+
 const router = useRouter();
-
 const { result: assets, loading } = asyncComputed(() => AssetModel.getLiveAssets());
+const createAsset = async (type?: string) => router.push({ name: 'new-asset', query: { type } });
+const goToAsset = (event: any) => router.push({ name: 'asset', params: { id: event.data.id } });
 
-const createAsset = async () => router.push({ name: 'new-asset' });
+const sections = computed(
+  () => assets.value 
+        ? assetTypeOptions.map((ato) => {
+          return {assets: assets.value?.filter((a) => a.type === ato) ?? [], type: ato}
+        }).filter((s) => s.assets.length > 0) 
+        : null
+);
 </script>
 
-<style scoped></style>
+<style scoped>
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+</style>

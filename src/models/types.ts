@@ -1,4 +1,18 @@
-type AssetTypeEnum = "fii" | "federal_bond" | "cdb" | "hedge_fund" | "other";
+type AssetTypeEnum =
+  | "fii"
+  | "federal_bond"
+  | "cdb"
+  | "hedge_fund"
+  | "stock"
+  | "other";
+export const assetTypeOptions: AssetTypeEnum[] = [
+  "fii",
+  "federal_bond",
+  "cdb",
+  "hedge_fund",
+  "stock",
+  "other",
+];
 
 type Metadata = {
   assets: {

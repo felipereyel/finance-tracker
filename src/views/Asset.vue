@@ -6,10 +6,7 @@
     <h2>{{ asset.name }}</h2>
     <div class="asset-columns">
       <textarea cols="30" rows="3" v-model="asset.comment"></textarea>
-      <div class="asset-sell-date">
-        <input type="date" v-model="asset.sellDate" />
-        <button @click="clearSellDate">Clear Sell Date</button>
-      </div>
+      <input type="date" v-model="asset.sellDate" />
     </div>
     <br>
     <h3>Prices</h3>
@@ -64,5 +61,9 @@ const addPrice = () => {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.asset-columns > *:not(:last-child) {
+  margin-bottom: 1rem;
 }
 </style>
