@@ -23,8 +23,8 @@ FROM  --platform=linux/x86_64 alpine:latest as release
 
 COPY --from=pocketbase /pb/pocketbase /pb
 COPY --from=vueapp /dist /pb_public
+COPY ./migrations /pb_migrations
 # database data at /pb_data - mount as volume
-# migrations at /pb_migrations - TODO
 
 # start PocketBase instance
 CMD ["/pb", "serve", "--http=0.0.0.0:8080"]
