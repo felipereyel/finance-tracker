@@ -1,5 +1,6 @@
 @import "primevue/resources/primevue.min.css";
 @import "primeicons/primeicons.css";
+@import "./utils.css";
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -102,4 +103,8 @@ textarea, input, .p-dropdown, .p-datatable {
   border: 1px solid #e9ecef;
   border-width: 1px 0 0 0;
   padding: 1rem 1rem;
+}
+
+.p-chart {
+  min-width: 800px;
 }

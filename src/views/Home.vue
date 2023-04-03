@@ -1,13 +1,15 @@
 <template>
-  <h1>Assets</h1>
+  <div class="col ai-s">
+    <h1>Assets</h1>
+  </div>
   <div v-if="loading">
     <h2>Loading...</h2>
   </div>
   <div v-else-if="sections">
     <div v-for="section in sections" :key="section.type">
-      <div class="section-head">
-        <h2>{{ section.type }}</h2>
-        <button @click="createAsset(section.type)">Create {{ section.type }}</button>
+      <div class="row ai-c jc-sb">
+        <h2>{{ formatAssetType(section.type) }}</h2>
+        <button class="btn-sm" @click="createAsset(section.type)">Create {{ formatAssetType(section.type) }}</button>
       </div>
       <DataTable :value="section.assets" tableStyle="min-width: 50rem" @row-click="goToAsset">
         <Column field="name" header="Name"></Column>
@@ -45,6 +47,7 @@ import { asyncComputed } from '../utils/vue';
 import { formatDate } from '../utils/date';
 import { formatCurrencyBRL } from '../utils/currency';
 import { computed } from 'vue';
+import { formatAssetType } from '../utils/types';
 
 const router = useRouter();
 const { result: assets, loading } = asyncComputed(() => AssetAggregatedModel.getLiveAssets());
@@ -61,9 +64,4 @@ const sections = computed(
 </script>
 
 <style scoped>
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 </style>

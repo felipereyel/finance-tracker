@@ -22,3 +22,9 @@ docker compose up --build
 docker compose up --build --scale vuewatcher=0
 VITE_POCKETBASE_URL=http://localhost:8080 npm run dev:local
 ```
+
+## TODO:
+
+- [ ] Add tests
+- [ ] Data Migrations
+- [ ] Add modeling for extra purchases for same asset

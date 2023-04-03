@@ -1,11 +1,21 @@
-type AssetTypeEnum =
+export type AssetType =
   | "fii"
   | "federal_bond"
   | "cdb"
   | "hedge_fund"
   | "stock"
   | "other";
-export const assetTypeOptions: AssetTypeEnum[] = [
+
+export const AssetTypeMap: Record<AssetType, string> = {
+  fii: "FII",
+  federal_bond: "Federal Bond",
+  cdb: "CDB",
+  hedge_fund: "Hedge Fund",
+  stock: "Stock",
+  other: "Other",
+};
+
+export const assetTypeOptions: AssetType[] = [
   "fii",
   "federal_bond",
   "cdb",
@@ -19,7 +29,7 @@ type Metadata = {
     insert: {
       id?: string;
       name: string;
-      type: AssetTypeEnum;
+      type: AssetType;
       initial_price: number;
       buy_date: string;
       sell_date?: string;
@@ -35,7 +45,7 @@ type Metadata = {
       created: string;
       updated: string;
       name: string;
-      type: AssetTypeEnum;
+      type: AssetType;
       initial_price: number;
       buy_date: string;
       sell_date?: string | null;
@@ -48,7 +58,7 @@ type Metadata = {
     select: {
       id: string;
       name: string;
-      type: AssetTypeEnum;
+      type: AssetType;
       initial_price: number;
       buy_date: string;
       sell_date?: string | null;

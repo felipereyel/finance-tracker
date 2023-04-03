@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "chart.js": "^4.2.1",
     "pocketbase": "^0.12.1",
     "primeicons": "^6.0.1",
     "primevue": "^3.25.0",
