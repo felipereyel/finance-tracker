@@ -6,6 +6,9 @@
     <h2>Loading...</h2>
   </div>
   <div v-else-if="sections">
+    <div class="row ai-s">
+      <h3>Total: {{ formatCurrencyBRL(total) }}</h3>
+    </div>
     <div v-for="section in sections" :key="section.type">
       <div class="row ai-c jc-sb">
         <h2>{{ formatAssetType(section.type) }}</h2>
@@ -61,6 +64,8 @@ const sections = computed(
         }).filter((s) => s.assets.length > 0) 
         : null
 );
+
+const total = computed(() => assets.value?.reduce((acc, cur) => acc + cur.latestPrice, 0) ?? 0);
 </script>
 
 <style scoped>
