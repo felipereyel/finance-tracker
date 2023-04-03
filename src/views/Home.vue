@@ -16,9 +16,19 @@
             {{ formatCurrencyBRL(data.initialPrice) }}
           </template>
         </Column>
-        <Column field="buy_date" header="Buy Date">
+        <Column field="buyDate" header="Buy Date">
           <template #body="{ data }">
-            {{ formatDate(data.buy_date) }}
+            {{ formatDate(data.buyDate) }}
+          </template>
+        </Column>
+        <Column field="latestPrice" header="Latest Price">
+          <template #body="{ data }">
+            {{ formatCurrencyBRL(data.latestPrice) }}
+          </template>
+        </Column>
+        <Column field="latestDate" header="Latest Date">
+          <template #body="{ data }">
+            {{ formatDate(data.latestDate) }}
           </template>
         </Column>
       </DataTable>
@@ -30,14 +40,14 @@
 import { useRouter } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { AssetModel, assetTypeOptions } from '../models';
+import { AssetAggregatedModel, assetTypeOptions } from '../models';
 import { asyncComputed } from '../utils/vue';
 import { formatDate } from '../utils/date';
 import { formatCurrencyBRL } from '../utils/currency';
 import { computed } from 'vue';
 
 const router = useRouter();
-const { result: assets, loading } = asyncComputed(() => AssetModel.getLiveAssets());
+const { result: assets, loading } = asyncComputed(() => AssetAggregatedModel.getLiveAssets());
 const createAsset = async (type?: string) => router.push({ name: 'new-asset', query: { type } });
 const goToAsset = (event: any) => router.push({ name: 'asset', params: { id: event.data.id } });
 

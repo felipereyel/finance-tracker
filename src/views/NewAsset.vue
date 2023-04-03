@@ -40,7 +40,7 @@ const createAsset = async () => {
     await AssetPriceModel.create({
       asset_id: asset.id,
       value: asset.initialPrice,
-      logged_at: asset.buy_date,
+      logged_at: asset.buyDate,
       comment: 'Initial Price',
       gain: 0,
     });

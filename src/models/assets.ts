@@ -52,7 +52,7 @@ export class AssetModel extends BaseModel<"assets"> {
     return this.dto.initial_price;
   }
 
-  get buy_date() {
+  get buyDate() {
     return this.dto.buy_date;
   }
 

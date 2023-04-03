@@ -42,6 +42,21 @@ type Metadata = {
       comment?: string;
     };
   };
+  assets_agg: {
+    insert: {};
+    update: {};
+    select: {
+      id: string;
+      name: string;
+      type: AssetTypeEnum;
+      initial_price: number;
+      buy_date: string;
+      sell_date?: string | null;
+      comment?: string;
+      latest_price: number;
+      latest_date: string;
+    };
+  };
   asset_prices: {
     insert: {
       id?: string;
