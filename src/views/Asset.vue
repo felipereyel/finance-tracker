@@ -11,7 +11,6 @@
       <textarea class="mb-1" cols="30" rows="3" v-model="asset.comment"></textarea>
       <input v-if="asset.sellDate" type="date" v-model="asset.sellDate" />
     </div>
-    <br>
     <div class="row jc-sb w-100 ai-c">
       <h3>Prices</h3>
       <button class="btn-sm" @click="addPrice">Add price</button>
@@ -24,7 +23,7 @@
         <span>Initial price: <b>{{ formatCurrencyBRL(asset.initialPrice) }}</b> (@ {{ formatDate(asset.buyDate) }})</span>
         <span>Current price: <b>{{ formatCurrencyBRL(latestPrice.value) }}</b> (@ {{ formatDate(latestPrice.loggedAt) }})</span>
       </div>
-      <Chart type="line" :data="chartData" :options="chartOptions" class="h-30rem" />
+      <Chart type="line" :data="chartData" :options="chartOptions" class="h-30rem" @select="select" />
     </div>
     <div v-else>Error</div>
   </div>
@@ -89,6 +88,13 @@ const addPrice = () => {
 const sell = () => {
   if (!asset.value) return;
   asset.value.sellDate = new Date().toISOString();
+}
+
+const select = ({ element }: any) => {
+  if (!element || !prices.value) return;
+  const price = prices.value[element.index]
+  if (!price) return;
+  router.push({ name: 'price', params: { id: price.id } });
 }
 </script>
 

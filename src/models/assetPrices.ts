@@ -18,6 +18,12 @@ export class AssetPriceModel extends BaseModel<"asset_prices"> {
     return new AssetPriceModel(dto);
   }
 
+  static async getPriceById(id: string) {
+    const result = await super.getById("asset_prices", id);
+    if (!result) return null;
+    return new AssetPriceModel(result);
+  }
+
   static async getForAsset(assetID: string) {
     const result = await super.getSome("asset_prices", {
       filter: `asset_id = "${assetID}"`,
