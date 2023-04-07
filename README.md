@@ -28,3 +28,8 @@ VITE_POCKETBASE_URL=http://localhost:8080 npm run dev:local
 - [ ] Add tests
 - [ ] Data Migrations
 - [ ] Add modeling for extra purchases for same asset
+- [ ] Users
+- [ ] wallets
+- [ ] currency
+- [ ] % gain
+- [ ] extrapolation 
