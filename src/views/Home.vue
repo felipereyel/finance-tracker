@@ -5,35 +5,49 @@
   <div v-if="loading">
     <h2>Loading...</h2>
   </div>
-  <div v-else-if="sections">
+  <div v-else>
     <div class="row ai-s">
       <h3>Total: {{ formatCurrencyBRL(total) }}</h3>
     </div>
-    <div v-for="section in sections" :key="section.type">
-      <div class="row ai-c jc-sb">
-        <h2>{{ formatAssetType(section.type) }}</h2>
-        <button class="btn-sm" @click="createAsset(section.type)">Create {{ formatAssetType(section.type) }}</button>
-      </div>
-      <DataTable :value="section.assets" tableStyle="min-width: 50rem" @row-click="goToAsset">
+    <div v-if="assets">
+      <DataTable    
+        :value="assets" 
+        tableStyle="min-width: 50rem"
+        rowGroupMode="subheader" 
+        groupRowsBy="type"
+        sortMode="single"
+        sortField="type" 
+        :sortOrder="1"
+        @row-click="goToAsset"
+      >
+        <template #groupheader="{ data }">
+          <div class="row jc-sb ai-c mt-2">
+            <div class="row ai-c">
+              <h2>{{ formatAssetType(data.type) }}</h2>
+              <span class="ml-0-5">({{ calculateTypeTotal(data.type) }})</span>
+            </div>
+            <button class="btn-sm" @click="createAsset(data.type)">Create {{ formatAssetType(data.type) }}</button>
+          </div>
+        </template>
         <Column field="name" header="Name"></Column>
-        <Column field="initialPrice" header="Buy Price">
-          <template #body="{ data }">
-            {{ formatCurrencyBRL(data.initialPrice) }}
-          </template>
-        </Column>
         <Column field="buyDate" header="Buy Date">
           <template #body="{ data }">
             {{ formatDate(data.buyDate) }}
           </template>
         </Column>
-        <Column field="latestPrice" header="Latest Price">
+        <Column field="initialPrice" header="Buy Price">
           <template #body="{ data }">
-            {{ formatCurrencyBRL(data.latestPrice) }}
+            {{ formatCurrencyBRL(data.initialPrice) }}
           </template>
         </Column>
         <Column field="latestDate" header="Latest Date">
           <template #body="{ data }">
             {{ formatDate(data.latestDate) }}
+          </template>
+        </Column>
+        <Column field="latestPrice" header="Latest Price">
+          <template #body="{ data }">
+            {{ formatCurrencyBRL(data.latestPrice) }}
           </template>
         </Column>
       </DataTable>
@@ -43,29 +57,31 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import DataTable from 'primevue/datatable';
+import { computed, nextTick, watch } from 'vue';
 import Column from 'primevue/column';
-import { AssetAggregatedModel, assetTypeOptions } from '../models';
-import { asyncComputed } from '../utils/vue';
+import DataTable from 'primevue/datatable';
+
 import { formatDate } from '../utils/date';
-import { formatCurrencyBRL } from '../utils/currency';
-import { computed } from 'vue';
+import { asyncComputed } from '../utils/vue';
 import { formatAssetType } from '../utils/types';
+import { AssetAggregatedModel } from '../models';
+import { formatCurrencyBRL } from '../utils/currency';
 
 const router = useRouter();
+
 const { result: assets, loading } = asyncComputed(() => AssetAggregatedModel.getLiveAssets());
+const total = computed(() => assets.value?.reduce((acc, cur) => acc + cur.latestPrice, 0) ?? 0);
+
 const createAsset = async (type?: string) => router.push({ name: 'new-asset', query: { type } });
 const goToAsset = (event: any) => router.push({ name: 'asset', params: { id: event.data.id } });
+const calculateTypeTotal = (type: string) => formatCurrencyBRL(assets.value?.filter(a => a.type === type).reduce((acc, cur) => acc + cur.latestPrice, 0) ?? 0);
 
-const sections = computed(
-  () => assets.value 
-        ? assetTypeOptions.map((ato) => {
-          return {assets: assets.value?.filter((a) => a.type === ato) ?? [], type: ato}
-        }).filter((s) => s.assets.length > 0) 
-        : null
-);
-
-const total = computed(() => assets.value?.reduce((acc, cur) => acc + cur.latestPrice, 0) ?? 0);
+watch(() => assets.value, async () => {
+  await nextTick();
+  document.querySelectorAll('.p-rowgroup-header > td').forEach((head) => {
+    head.setAttribute('colspan', '6');
+  });
+});
 </script>
 
 <style scoped>

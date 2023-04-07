@@ -41,7 +41,7 @@ h1 {
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid #e9ecef;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
@@ -98,13 +98,22 @@ textarea, input, .p-dropdown, .p-datatable {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 .p-datatable-tbody > tr > td {
   text-align: left;
   border: 1px solid #e9ecef;
-  border-width: 1px 0 0 0;
-  padding: 1rem 1rem;
+  border-width: 0px 0 1px 0;
+  padding: 1rem 0rem 1rem 0;
 }
 
 .p-chart {
   min-width: 800px;
+}
+
+.p-datatable-tbody > .p-rowgroup-header > td {
+  border: unset;
+}
+
+.p-rowgroup-header > td > div > div > h2 {
+  margin: 0;
 }

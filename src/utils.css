@@ -68,9 +68,11 @@ align-items: center;
 
 .ai-c { align-items: center; }
 .ai-s { align-items: flex-start; }
+.ai-e { align-items: flex-end; }
 .ai-st { align-items: stretch; }
 
 .jc-c { justify-content: center; }
+.jc-e { justify-content: flex-end; }
 .jc-sb { justify-content: space-between; }
 
 
@@ -1112,4 +1114,5 @@ border-bottom-right-radius: 0;
   line-height: 1.5;
   border-radius: 0.2em;
   height: 2em;
+  font-size: 0.75em;
 }
