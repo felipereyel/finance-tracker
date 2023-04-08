@@ -33,14 +33,16 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
+import { computed } from 'vue';
+import 'chartjs-adapter-moment';
 import Chart from 'primevue/chart';
-import { AssetModel, AssetPriceModel } from '../models';
-import { asyncComputed } from '../utils/vue';
+import { useRoute, useRouter } from 'vue-router';
+
 import { formatDate } from '../utils/date';
+import { asyncComputed } from '../utils/vue';
 import { formatAssetType } from '../utils/types';
 import { formatCurrencyBRL } from '../utils/currency';
-import { computed } from 'vue';
+import { AssetModel, AssetPriceModel } from '../models';
 
 const route = useRoute();
 const router = useRouter();
@@ -55,13 +57,17 @@ const latestPrice = computed(() => {
 
 const chartOptions = {
   scales: {
-    yAxes: [
-      {
-        ticks: {
-          beginAtZero: true,
-        },
+    y: {
+      ticks: {
+        beginAtZero: true,
       },
-    ],
+    },
+    x: {
+      type: 'time',
+      time: {
+        unit: 'day',
+      },
+    }
   },
 };
 
@@ -74,8 +80,7 @@ const chartData = computed(() => {
         label: 'Price',
         data: prices.value.map((price) => price.value),
         fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
+        borderColor: 'rgb(105, 193, 102)',
       },
     ],
   };

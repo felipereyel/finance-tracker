@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "chart.js": "^4.2.1",
+    "chartjs-adapter-moment": "^1.0.1",
+    "moment": "^2.29.4",
     "pocketbase": "^0.12.1",
     "primeicons": "^6.0.1",
     "primevue": "^3.25.0",
