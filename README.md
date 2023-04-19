@@ -25,6 +25,8 @@ VITE_POCKETBASE_URL=http://localhost:8080 npm run dev:local
 
 ## TODO:
 
+- [ ] Add hrefs
+- [ ] Add window titles
 - [ ] Add tests
 - [ ] Data Migrations
 - [ ] Add modeling for extra purchases for same asset
