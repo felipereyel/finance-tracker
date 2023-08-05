@@ -14,13 +14,15 @@ services:
       - ./pkgs:/app/pkgs
     env_file:
       - .env
-  # vue:
-  #   container_name: vue
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.vue
-  #   ports:
-  #     - 5173:5173
-  #   environment:
-  #     - VITE_POCKETBASE_URL=http://pb
+  vue:
+    container_name: vue
+    build:
+      context: .
+      dockerfile: Dockerfile.vue
+    ports:
+      - 5173:5173
+    volumes:
+      - ./src:/app/src
+    environment:
+      - VITE_POCKETBASE_URL=http://localhost:8090
   
