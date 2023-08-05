@@ -1,5 +1,5 @@
 # Build the Vue app
-FROM  --platform=linux/x86_64 node:18-alpine as vueapp
+FROM node:18-alpine as vueapp
 
 COPY package.json package-lock.json ./
 RUN npm install
