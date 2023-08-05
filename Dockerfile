@@ -1,13 +1,17 @@
-# Download the latest version of PocketBase
-FROM  --platform=linux/x86_64 alpine:latest as pocketbase
-ARG PB_VERSION=0.13.4
+# Build the Go binary
+FROM --platform=linux/x86_64 golang:1.20-alpine AS goapp
+WORKDIR /app
 
-RUN apk add --no-cache unzip ca-certificates
-ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
-RUN unzip /tmp/pb.zip -d /pb/
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY main.go  .
+COPY pkgs/ pkgs/
+RUN go build -o ./goapp
 
 # Build the Vue app
 FROM  --platform=linux/x86_64 node:18-alpine as vueapp
+WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm install
@@ -17,14 +21,15 @@ COPY ./public ./public
 COPY index.html tsconfig.json tsconfig.node.json vite.config.ts ./
 RUN npm run build
 
-
 # Build the final image
 FROM  --platform=linux/x86_64 alpine:latest as release
+WORKDIR /app
 
-COPY --from=pocketbase /pb/pocketbase /pb
-COPY --from=vueapp /dist /pb_public
+COPY --from=goapp /app/goapp /goapp
+COPY --from=vueapp /app/dist /dist
 # database data at /pb_data - mount as volume
-# migrations at /pb_migrations - TODO
 
-# start PocketBase instance
-CMD ["/pb", "serve", "--http=0.0.0.0:8080"]
+
+EXPOSE 8080
+ENV PUBLIC_DIR /dist
+CMD ["/goapp", "serve", "--http=0.0.0.0:8080"]
