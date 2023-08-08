@@ -13,7 +13,6 @@ import (
 
 func main() {
 	app := pocketbase.New()
-	app.Settings()
 	publicDir := os.Getenv("PUBLIC_DIR")
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {

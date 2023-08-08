@@ -1,5 +1,5 @@
 # Build the Go binary
-FROM --platform=linux/x86_64 golang:1.20-alpine AS goapp
+FROM golang:1.20-alpine AS goapp
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -10,7 +10,7 @@ COPY pkgs/ pkgs/
 RUN go build -o ./goapp
 
 # Build the Vue app
-FROM  --platform=linux/x86_64 node:18-alpine as vueapp
+FROM node:18-alpine as vueapp
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -22,7 +22,7 @@ COPY index.html tsconfig.json tsconfig.node.json vite.config.ts ./
 RUN npm run build
 
 # Build the final image
-FROM  --platform=linux/x86_64 alpine:latest as release
+FROM alpine:latest as release
 WORKDIR /app
 
 COPY --from=goapp /app/goapp /goapp
