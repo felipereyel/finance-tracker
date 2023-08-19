@@ -22,7 +22,7 @@ docker run -p 8080:8080 -v ./pb_data:/pb_data fintracker
 ### Go Backend
 
 ```bash
-go run maio.go
+go run main.go
 # or
 air
 ```
@@ -35,13 +35,18 @@ VITE_POCKETBASE_URL=http://localhost:8090 npm run dev
 
 ## TODO:
 
+### Must
+
 - [ ] Add hrefs
 - [ ] Add window titles
-- [ ] Add tests
-- [ ] Data Migrations
-- [ ] Add modeling for extra purchases for same asset
+- [x] Data Migrations
 - [ ] Users
 - [ ] wallets
+
+### Later
+
+- [ ] Add tests
+- [ ] Add modeling for extra purchases for same asset
 - [ ] currency
 - [ ] % gain
 - [ ] extrapolation 
