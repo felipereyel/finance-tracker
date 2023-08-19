@@ -29,7 +29,11 @@
             <button class="btn-sm" @click="createAsset(data.type)">Create {{ formatAssetType(data.type) }}</button>
           </div>
         </template>
-        <Column field="name" header="Name"></Column>
+        <Column field="name" header="Name">
+          <template #body="{ data }">
+            <a :href="assetUrl(data.id)" >{{ data.name }}</a>
+          </template>
+        </Column>
         <Column field="buyDate" header="Buy Date">
           <template #body="{ data }">
             {{ formatDate(data.buyDate) }}
@@ -77,6 +81,7 @@ const total = computed(() => assets.value?.reduce((acc, cur) => acc + cur.latest
 
 const createAsset = async (type?: string) => router.push({ name: 'new-asset', query: { type } });
 const goToAsset = (event: any) => router.push({ name: 'asset', params: { id: event.data.id } });
+const assetUrl = (id: string) => router.resolve({ name: 'asset', params: { id } }).href;
 const calculateTypeTotal = (type: string) => formatCurrencyBRL(assets.value?.filter(a => a.type === type).reduce((acc, cur) => acc + cur.latestPrice, 0) ?? 0);
 
 watch(() => assets.value, async () => {
@@ -86,6 +91,3 @@ watch(() => assets.value, async () => {
   });
 });
 </script>
-
-<style scoped>
-</style>

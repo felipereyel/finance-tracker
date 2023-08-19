@@ -37,14 +37,15 @@ VITE_POCKETBASE_URL=http://localhost:8090 npm run dev
 
 ### Must
 
-- [ ] Add hrefs
-- [ ] Add window titles
+- [x] Add hrefs
+- [x] Add window titles
 - [x] Data Migrations
 - [ ] Users
 - [ ] wallets
 
 ### Later
 
+- [ ] Back
 - [ ] Add tests
 - [ ] Add modeling for extra purchases for same asset
 - [ ] currency
