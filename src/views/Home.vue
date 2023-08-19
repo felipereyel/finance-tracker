@@ -56,18 +56,21 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { computed, nextTick, watch } from 'vue';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 
+import { setTitle } from '../utils/title';
 import { formatDate } from '../utils/date';
 import { asyncComputed } from '../utils/vue';
 import { formatAssetType } from '../utils/types';
 import { AssetAggregatedModel } from '../models';
 import { formatCurrencyBRL } from '../utils/currency';
 
+const route = useRoute();
 const router = useRouter();
+setTitle(route, 'Assets');
 
 const { result: assets, loading } = asyncComputed(() => AssetAggregatedModel.getLiveAssets());
 const total = computed(() => assets.value?.reduce((acc, cur) => acc + cur.latestPrice, 0) ?? 0);

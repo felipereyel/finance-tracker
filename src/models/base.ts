@@ -1,4 +1,4 @@
-import type { insertArgs, selectArgs, TableName, updateArgs } from "./types";
+import type { expandableArgs, expandedArgs, insertArgs, selectArgs, TableName, updateArgs } from "./types";
 import { pb } from "../services/pocketbase";
 
 type GetSomeParams = {
@@ -36,10 +36,25 @@ export class BaseModel<T extends TableName> {
       .getOne<selectArgs<T> | null | undefined>(id);
   }
 
+  protected static async getByIdExpanded<T extends TableName>(table: T, id: string, expandArr: Array<expandableArgs<T>>) {
+    return await pb
+      .collection(table)
+      .getOne<selectArgs<T> & expandedArgs<T, typeof expandArr> | null | undefined>(id, { expand: expandArr.join(",") });
+  }
+
   protected static async getSome<T extends TableName>(
     table: T,
     params?: GetSomeParams
   ) {
     return await pb.collection(table).getFullList<selectArgs<T>>(params);
+  }
+
+  protected static async getSomeExpanded<T extends TableName>(
+    table: T,  
+    expandArr: Array<expandableArgs<T>>,
+    params?: GetSomeParams
+  ) {
+    const query = { ...params, expand: expandArr.join(",") }
+    return await pb.collection(table).getFullList<selectArgs<T> | expandedArgs<T, typeof expandArr>>(query);
   }
 }

@@ -32,6 +32,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { AssetModel, AssetPriceModel, AssetPriceCreateDTO } from '../models';
 import { asyncComputed } from '../utils/vue';
 import { now } from '../utils/date';
+import { setTitle } from '../utils/title';
 
 const route = useRoute();
 const router = useRouter();
@@ -51,9 +52,10 @@ const createPrice = async () => {
   }
 };
 
-watch(() => asset.value?.initialPrice, () => {
+watch(() => asset.value, () => {
   if (!asset.value) return
   state.value.newPrice.value = asset.value.initialPrice;
+  setTitle(route, asset.value.name)
 })
 
 watch(() => state.value.newPrice.value, () => {

@@ -33,11 +33,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import 'chartjs-adapter-moment';
 import Chart from 'primevue/chart';
 import { useRoute, useRouter } from 'vue-router';
 
+import { setTitle } from '../utils/title';
 import { formatDate } from '../utils/date';
 import { asyncComputed } from '../utils/vue';
 import { formatAssetType } from '../utils/types';
@@ -49,6 +50,11 @@ const router = useRouter();
 
 const { result: asset, loading: assetLoading } = asyncComputed(() => AssetModel.getAssetById(route.params.id as string));
 const { result: prices, loading: pricesLoadig } = asyncComputed(() => AssetPriceModel.getForAsset(route.params.id as string));
+
+watch(() => asset.value, () => {
+  if (!asset.value) return
+  setTitle(route, asset.value.name)
+})
 
 const latestPrice = computed(() => {
   if (!prices.value) return;

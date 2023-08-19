@@ -9,19 +9,19 @@ export class AssetModel extends BaseModel<"assets"> {
     super("assets", dto.id, dto);
   }
 
+  static from(dto: AssetDTO): AssetModel {
+    return new AssetModel(dto);
+  }
+
   static async create(object: AssetCreateDTO): Promise<AssetModel> {
     const dto = await super.insert("assets", object);
     return AssetModel.from(dto);
   }
 
-  static from(dto: AssetDTO): AssetModel {
-    return new AssetModel(dto);
-  }
-
   static async getAssetById(id: string) {
     const result = await super.getById("assets", id);
     if (!result) return null;
-    return new AssetModel(result);
+    return AssetModel.from(result);
   }
 
   static async getLiveAssets() {

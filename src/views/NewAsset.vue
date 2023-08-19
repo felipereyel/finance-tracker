@@ -21,9 +21,11 @@ import { useRouter, useRoute } from 'vue-router';
 import { AssetModel, AssetCreateDTO, AssetPriceModel, assetTypeOptions } from '../models';
 import { now } from '../utils/date';
 import Dropdown from 'primevue/dropdown';
+import { setTitle } from '../utils/title';
 
-const router = useRouter();
 const route = useRoute();
+const router = useRouter();
+setTitle(route);
 
 const state = ref({
   newAsset: { 

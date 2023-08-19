@@ -31,12 +31,20 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
+
+import { watch } from 'vue';
+import { setTitle } from '../utils/title';
 import { AssetPriceModel } from '../models';
 import { asyncComputed } from '../utils/vue';
 
 const route = useRoute();
 const router = useRouter();
 const { result: price, loading: priceLoadig } = asyncComputed(() => AssetPriceModel.getPriceById(route.params.id as string));
+
+watch(() => price.value, () => {
+  if (!price.value?.asset) return
+  setTitle(route, price.value.asset.name)
+})
 </script>
 
 <style scoped></style>
