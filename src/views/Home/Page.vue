@@ -6,12 +6,13 @@
     <h2>Loading...</h2>
   </div>
   <div v-else-if="result">
-    <div class="row ai-s">
-      <h3>Total: {{ formatCurrencyBRL(result.total) }}</h3>
+    <div class="row ai-c jc-sb">
+      <h3>Total: {{ formatCurrencyBRL(total) }}</h3>
+      <Dropdown v-model="state.seletectedWallet" :options="result.walletOptions" placeholder="Select Type" option-label="label" option-value="value" />
     </div>
     <div>
       <DataTable    
-        :value="result.assets" 
+        :value="assets" 
         tableStyle="min-width: 50rem"
         rowGroupMode="subheader" 
         groupRowsBy="type"
@@ -24,7 +25,7 @@
           <div class="row jc-sb ai-c mt-2">
             <div class="row ai-c">
               <h2>{{ formatAssetType(data.type) }}</h2>
-              <span class="ml-0-5">({{ result.totalByType[data.type as AssetType] }})</span>
+              <span class="ml-0-5">({{ totalByType[data.type as AssetType] }})</span>
             </div>
             <button class="btn-sm" @click="createAsset(data.type)">Create {{ formatAssetType(data.type) }}</button>
           </div>
@@ -64,27 +65,57 @@
 
 <script setup lang="ts">
 import Column from 'primevue/column';
-import { nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+import Dropdown from 'primevue/dropdown';
 import DataTable from 'primevue/datatable';
+import { computed, nextTick, reactive, watch } from 'vue';
 
 import { query } from "."
 import { AssetType } from '../../models';
 import { formatDate } from '../../utils/date';
+import { shakeDataTable } from '../../utils/vue';
 import { formatAssetType } from '../../utils/types';
 import { formatCurrencyBRL } from '../../utils/currency';
 
 const router = useRouter();
-const { result, loading, onResult } = query();
+const { result, loading } = query();
 
-onResult(async () => {
-  await nextTick();
-  document.querySelectorAll('.p-rowgroup-header > td').forEach((head) => {
-    head.setAttribute('colspan', '6');
-  });
+const state = reactive({
+  seletectedWallet: "all",
 });
+
+const assets = computed(() => {
+  if (!result.value) return [];
+  if (state.seletectedWallet == "all") return result.value.assets;
+  return result.value.assets.filter((asset) => asset.walletId === state.seletectedWallet);
+});
+
+const total = computed(() => {
+  if (!result.value) return 0;
+  return assets.value.reduce((acc, cur) => acc + cur.latestPrice, 0);
+});
+
+const totalByType = computed(() => {
+  if (!result.value) return {} as Record<AssetType, string>;
+  const _totalByType = assets.value.reduce((acc, cur) => {
+      if (!acc[cur.type]) acc[cur.type] = 0;
+      acc[cur.type] += cur.latestPrice;
+      return acc;
+  }, {} as Record<AssetType, number>)
+  
+  return Object.keys(_totalByType).reduce((acc, cur) => {
+      acc[cur as AssetType] = formatCurrencyBRL(_totalByType[cur as AssetType]);
+      return acc;
+  }, {} as Record<AssetType, string>);
+});
+
+watch(() => assets.value, () => nextTick().then(shakeDataTable));
 
 const assetUrl = (id: string) => router.resolve({ name: 'asset', params: { id } }).href;
 const goToAsset = (event: any) => router.push({ name: 'asset', params: { id: event.data.id } });
-const createAsset = async (type?: string) => router.push({ name: 'new-asset', query: { type } });
+const createAsset = async (type?: string) => {
+  const query: Record<string, string> = type ? { type } : {};
+  if (state.seletectedWallet !== "all") query.wallet = state.seletectedWallet;
+  router.push({ name: 'new-asset', query })
+};
 </script>

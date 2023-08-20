@@ -85,6 +85,13 @@ button:focus-visible {
 
 .p-dropdown-panel {
   background: black;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+
+.p-dropdown-item {
+  padding: 5px
 }
 
 textarea, input, .p-dropdown, .p-datatable {

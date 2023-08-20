@@ -28,6 +28,7 @@ dist-ssr
 
 # Database
 pb_data
+pb_data_bk
 __pb_data
 
 # Air

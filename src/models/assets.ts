@@ -50,6 +50,10 @@ export class AssetModel extends BaseModel<"assets"> {
     return this.dto.comment ?? "";
   }
 
+  get walletId() {
+    return this.dto.wallet;
+  }
+
   set name(name) {
     this.update({ name });
   }

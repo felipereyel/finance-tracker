@@ -30,3 +30,9 @@ export const asyncComputed = <T>(asyncFunc: () => Promise<T>) => {
 
   return { result, loading, onResult };
 };
+
+export const shakeDataTable = () => {
+  document.querySelectorAll('.p-rowgroup-header > td').forEach((head) => {
+    head.setAttribute('colspan', '6');
+  });
+};

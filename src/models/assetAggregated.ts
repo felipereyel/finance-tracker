@@ -43,4 +43,8 @@ export class AssetAggregatedModel extends BaseModel<"assets_agg"> {
   get latestDate() {
     return this.dto.latest_date;
   }
+
+  get walletId() {
+    return this.dto.wallet;
+  }
 }
