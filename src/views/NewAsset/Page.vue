@@ -17,15 +17,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { AssetModel, AssetCreateDTO, AssetPriceModel, assetTypeOptions } from '../models';
-import { now } from '../utils/date';
 import Dropdown from 'primevue/dropdown';
-import { setTitle } from '../utils/title';
+import { useRouter, useRoute } from 'vue-router';
 
+import { now } from '../../utils/date';
+import { setTitle } from '../../router';
+import { AssetModel, AssetCreateDTO, AssetPriceModel, assetTypeOptions } from '../../models';
+
+setTitle();
 const route = useRoute();
 const router = useRouter();
-setTitle(route);
 
 const state = ref({
   newAsset: { 

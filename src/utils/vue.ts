@@ -1,16 +1,20 @@
 import { computed, ref } from "@vue/reactivity";
 import { watch, type Ref } from "vue";
 
-export const asyncComputed = <T>(
-  asyncFunc: () => Promise<T>
-): { result: Ref<T | null>; loading: Ref<boolean> } => {
+export const asyncComputed = <T>(asyncFunc: () => Promise<T>) => {
   const loading = ref(true);
   const result: Ref<T | null> = ref(null);
   const funcPromise = computed(() => asyncFunc());
 
+  const callBacks: Array<() => void | Promise<void>> = [];
+  const onResult = (cb: () => void | Promise<void>) => {
+    callBacks.push(cb);
+  };
+
   const resolve = (res: T) => {
     result.value = res;
     loading.value = false;
+    callBacks.forEach(cb => cb());
   };
 
   watch(
@@ -24,5 +28,5 @@ export const asyncComputed = <T>(
 
   funcPromise.value.then(resolve);
 
-  return { result, loading };
+  return { result, loading, onResult };
 };

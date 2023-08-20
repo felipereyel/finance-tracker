@@ -1,10 +1,10 @@
 <template>
-  <div v-if="assetLoading">
+  <div v-if="loading">
     <h2>Loading...</h2>
   </div>
-  <div v-else-if="asset">
-    <h2>New Price: {{ asset.name }}</h2>
-    <span>Inital price was R${{ asset.initialPrice }}</span>
+  <div v-else-if="result">
+    <h2>New Price: {{ result.asset.name }}</h2>
+    <span>Inital price was R${{ result.asset.initialPrice }}</span>
     <div class="asset-columns">
       <h3>Price</h3>
       <input type="number" v-model="state.newPrice.value" />
@@ -29,18 +29,26 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { AssetModel, AssetPriceModel, AssetPriceCreateDTO } from '../models';
-import { asyncComputed } from '../utils/vue';
-import { now } from '../utils/date';
-import { setTitle } from '../utils/title';
+
+import { query } from '.';
+import { now } from '../../utils/date';
+import { AssetPriceModel, AssetPriceCreateDTO } from '../../models';
 
 const route = useRoute();
 const router = useRouter();
+const { result, loading, onResult } = query(route.params.id as string);
 
-const { result: asset, loading: assetLoading } = asyncComputed(() => AssetModel.getAssetById(route.params.id as string));
+onResult(() => {
+  if (!result.value) return
+  state.value.newPrice.value = result.value.asset.latestPrice;
+})
 
 const state = ref({
-  newPrice: { asset_id: route.params.id, gain: 0, logged_at: now() } as AssetPriceCreateDTO,
+  newPrice: { 
+    asset_id: route.params.id, 
+    gain: 0, 
+    logged_at: now()
+  } as AssetPriceCreateDTO,
 });
 
 const createPrice = async () => {
@@ -52,15 +60,9 @@ const createPrice = async () => {
   }
 };
 
-watch(() => asset.value, () => {
-  if (!asset.value) return
-  state.value.newPrice.value = asset.value.initialPrice;
-  setTitle(route, asset.value.name)
-})
-
 watch(() => state.value.newPrice.value, () => {
-  if (!asset.value) return
-  state.value.newPrice.gain = state.value.newPrice.value - asset.value.initialPrice;
+  if (!result.value) return
+  state.value.newPrice.gain = state.value.newPrice.value - result.value.asset.initialPrice;
   state.value.newPrice.gain = Math.round(state.value.newPrice.gain * 100) / 100;
 })
 

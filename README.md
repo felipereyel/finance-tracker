@@ -42,6 +42,7 @@ VITE_POCKETBASE_URL=http://localhost:8090 npm run dev
 - [x] Data Migrations
 - [ ] Users
 - [ ] wallets
+- [ ] Fix Date Inputs
 
 ### Later
 

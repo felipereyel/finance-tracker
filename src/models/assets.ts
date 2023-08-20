@@ -18,20 +18,6 @@ export class AssetModel extends BaseModel<"assets"> {
     return AssetModel.from(dto);
   }
 
-  static async getAssetById(id: string) {
-    const result = await super.getById("assets", id);
-    if (!result) return null;
-    return AssetModel.from(result);
-  }
-
-  static async getLiveAssets() {
-    const result = await super.getSome("assets", {
-      filter: "sell_date = NULL",
-      sort: "buy_date",
-    });
-    return result.map(AssetModel.from);
-  }
-
   get createdAt() {
     return this.dto.created;
   }

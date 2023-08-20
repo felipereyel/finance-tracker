@@ -12,20 +12,6 @@ export class AssetAggregatedModel extends BaseModel<"assets_agg"> {
     return new AssetAggregatedModel(dto);
   }
 
-  static async getAssetById(id: string) {
-    const result = await super.getById("assets_agg", id);
-    if (!result) return null;
-    return new AssetAggregatedModel(result);
-  }
-
-  static async getLiveAssets() {
-    const result = await super.getSome("assets_agg", {
-      filter: "sell_date = NULL",
-      sort: "buy_date",
-    });
-    return result.map(AssetAggregatedModel.from);
-  }
-
   get name() {
     return this.dto.name;
   }
