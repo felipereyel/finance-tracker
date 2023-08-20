@@ -3,8 +3,6 @@ import { TableName, expandableArgs, expandedArgs, insertArgs, selectArgs, update
 
 const POCKETBASE_URL = import.meta.env.VITE_POCKETBASE_URL || "/";
 
-export const pb = new PocketBase(POCKETBASE_URL);
-
 type QueryParams = {
   filter?: string;
   sort?: string;
