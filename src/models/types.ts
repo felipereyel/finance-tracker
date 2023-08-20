@@ -25,6 +25,22 @@ export const assetTypeOptions: AssetType[] = [
 ];
 
 type Metadata = {
+  wallets: {
+    insert: {
+      id?: string;
+      name: string;
+    };
+    update: {
+      name?: string;
+    };
+    select: {
+      id: string;
+      created: string;
+      updated: string;
+      name: string;
+    };
+    expandable: {};
+  };
   assets: {
     insert: {
       id?: string;
@@ -32,6 +48,7 @@ type Metadata = {
       type: AssetType;
       initial_price: number;
       buy_date: string;
+      wallet: string;
       sell_date?: string;
       comment?: string;
     };
@@ -48,10 +65,13 @@ type Metadata = {
       type: AssetType;
       initial_price: number;
       buy_date: string;
+      wallet: string;
       sell_date?: string | null;
       comment?: string;
     };
-    expandable: {};
+    expandable: {
+      "wallet": "wallets";
+    };
   };
   assets_agg: {
     insert: {};
@@ -62,6 +82,7 @@ type Metadata = {
       type: AssetType;
       initial_price: number;
       buy_date: string;
+      wallet: string;
       sell_date?: string | null;
       comment?: string;
       latest_price: number;
