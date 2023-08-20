@@ -1,15 +1,15 @@
 import { setTitle } from '../../router';
+import pbw from '../../services/pocketbase';
 import { formatDate } from '../../utils/date';
-import { pb } from '../../services/pocketbase';
 import { asyncComputed } from '../../utils/vue';
-import { AssetModel, AssetPriceModel, selectArgs } from '../../models';
+import { AssetModel, AssetPriceModel } from '../../models';
 
 
 export function query(assetId: string) {
   return asyncComputed(async () => {
     const [rawAsset, rawPrices] = await Promise.all([
-        pb.collection('assets').getOne<selectArgs<"assets"> | null | undefined>(assetId),
-        pb.collection('asset_prices').getFullList<selectArgs<"asset_prices">>({ 
+        pbw.getOneRecord('assets', assetId),
+        pbw.getFullRecordList('asset_prices', { 
             filter: `asset_id = "${assetId}"`, // INJECTION WARNING
             sort: "logged_at" 
         })

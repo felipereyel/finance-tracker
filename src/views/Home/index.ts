@@ -1,14 +1,14 @@
 import { setTitle } from '../../router';
-import { pb } from '../../services/pocketbase';
+import pbw from '../../services/pocketbase';
 import { asyncComputed } from '../../utils/vue';
 import { formatCurrencyBRL } from '../../utils/currency';
-import { AssetAggregatedModel, AssetType, selectArgs } from '../../models';
+import { AssetAggregatedModel, AssetType } from '../../models';
 
 
 export function query() {
   return asyncComputed(async () => {
     setTitle('Assets');
-    const data = await pb.collection('assets_agg').getFullList<selectArgs<"assets_agg">>({
+    const data = await pbw.getFullRecordList('assets_agg', {
         filter: "sell_date = NULL",
         sort: "buy_date",
     });
