@@ -8,12 +8,12 @@ import { AssetAggregatedModel, AssetType } from '../../models';
 export function query() {
   return asyncComputed(async () => {
     setTitle('Assets');
-    const data = await pbw.getFullRecordList('assets_agg', {
+    const rawAssets = await pbw.getFullRecordList('assets_agg', {
         filter: "sell_date = NULL",
         sort: "buy_date",
     });
 
-    const assets = data.map(AssetAggregatedModel.from);
+    const assets = rawAssets.map(AssetAggregatedModel.from);
     const total = assets.reduce((acc, cur) => acc + cur.latestPrice, 0);
     
     const _totalByType = assets.reduce((acc, cur) => {

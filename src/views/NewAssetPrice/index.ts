@@ -6,11 +6,11 @@ import { AssetAggregatedModel } from '../../models';
 
 export function query(assetId: string) {
   return asyncComputed(async () => {
-    const data = await pbw.getOneRecord('assets_agg', assetId);
-    if (!data) return null;
+    const rawAsset = await pbw.getOneRecord('assets_agg', assetId);
+    if (!rawAsset) return null;
 
-    setTitle(data.name);
-    const asset = AssetAggregatedModel.from(data);
+    setTitle(rawAsset.name);
+    const asset = AssetAggregatedModel.from(rawAsset);
 
     return { asset };
   });
