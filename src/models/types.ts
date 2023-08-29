@@ -70,7 +70,7 @@ type Metadata = {
       comment?: string;
     };
     expandable: {
-      "wallet": "wallets";
+      wallet: "wallets";
     };
   };
   assets_agg: {
@@ -116,7 +116,7 @@ type Metadata = {
       comment?: string;
     };
     expandable: {
-      "asset_id": "assets";
+      asset_id: "assets";
     }
   };
 };
@@ -141,6 +141,7 @@ type Expandable<T extends TableName> = Table<T>["expandable"];
 export type expandableArgs<T extends TableName> = keyof Expandable<T>;
 export type expandedArgs<T extends TableName, A extends Array<expandableArgs<T>>> = {
   expand: {
+    //@ts-ignore
     [K in A[number]]: selectArgs<Metadata[T]['expandable'][K]>;
   }
 }

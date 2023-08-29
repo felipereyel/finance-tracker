@@ -22,7 +22,7 @@
         <input type="number" v-model="result.price.gain">
       </div>
     </div>
-    <button @click="router.push({ name: 'asset', params: { id: result.asset.id } })">Back</button>
+    <button @click="back">Back</button>
   </div>
   <div v-else>
     <h2>Not found</h2>
@@ -38,4 +38,8 @@ const route = useRoute();
 const router = useRouter();
 const { result, loading } = query(route.params.id as string);
 
+const back = () =>{
+  if (!result.value) return;
+  router.push({ name: 'asset', params: { id: result.value.asset.id } });
+}
 </script>
