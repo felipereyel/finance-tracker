@@ -43,6 +43,7 @@ VITE_POCKETBASE_URL=http://localhost:8090 npm run dev
 - [x] wallets
 - [ ] Users
 - [ ] User add wallet
+- [ ] Add template data
 - [ ] Fix Date Inputs
 
 ### Later
