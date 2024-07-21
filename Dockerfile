@@ -1,5 +1,5 @@
 # Build the Go binary
-FROM golang:1.20-alpine AS goapp
+FROM golang:1.22.5-alpine AS goapp
 WORKDIR /app
 
 COPY go.mod go.sum ./
