@@ -1,5 +1,5 @@
 <template>
-  <h2>Edit Price</h2>
+  <h2 class="row jc-sb w-100 ai-c">Edit Price</h2>
   <div v-if="loading">
     <h2>Loading...</h2>
   </div>
@@ -22,7 +22,6 @@
         <input type="number" v-model="result.price.gain">
       </div>
     </div>
-    <button @click="back">Back</button>
   </div>
   <div v-else>
     <h2>Not found</h2>
@@ -30,16 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import { query } from '.';
 
 const route = useRoute();
-const router = useRouter();
 const { result, loading } = query(route.params.id as string);
 
-const back = () =>{
-  if (!result.value) return;
-  router.push({ name: 'asset', params: { id: result.value.asset.id } });
-}
 </script>

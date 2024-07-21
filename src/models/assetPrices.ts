@@ -38,7 +38,7 @@ export class AssetPriceModel extends BaseModel<"asset_prices"> {
   }
 
   get loggedAt() {
-    return this.dto.logged_at;
+    return this.dto.logged_at.slice(0, 10);
   }
 
   get gain() {

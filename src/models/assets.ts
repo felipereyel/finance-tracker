@@ -43,7 +43,9 @@ export class AssetModel extends BaseModel<"assets"> {
   }
 
   get sellDate() {
-    return this.dto.sell_date;
+    if (!this.dto.sell_date)  return null;
+    
+    return this.dto.sell_date.slice(0, 10);
   }
 
   get comment() {
