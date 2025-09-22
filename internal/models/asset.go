@@ -1,6 +1,14 @@
 package models
 
 // Type:  "fii" | "federal_bond" | "cdb" | "hedge_fund" | "stock" | "other"
+var AssetTypes = [][]string{
+	{"fii", "FII"},
+	{"federal_bond", "Federal Bond"},
+	{"cdb", "CDB"},
+	{"hedge_fund", "Hedge Fund"},
+	{"stock", "Stock"},
+	{"other", "Other"},
+}
 
 type AssetAggregate struct {
 	Id           string  `json:"id"`
@@ -17,6 +25,12 @@ type AssetAggregate struct {
 type Summary struct {
 	Total      float32
 	Aggregates []AssetAggregate
+
+	AssetTypes   [][]string
+	SelectedType string
+
+	Wallets        [][]string
+	SelectedWallet string
 }
 
 type Asset struct {

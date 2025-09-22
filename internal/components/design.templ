@@ -48,13 +48,43 @@ templ spanTagGradientMonochrome(text string, color string) {
     <span class={"text-white", "bg-gradient-to-r", fmt.Sprintf("from-%s-500", color), fmt.Sprintf("via-%s-600", color), fmt.Sprintf("to-%s-700", color), "hover:bg-gradient-to-br", "focus:ring-4", "focus:outline-none", fmt.Sprintf("focus:ring-%s-300", color), fmt.Sprintf("dark:focus:ring-%s-800", color), "font-medium", "rounded-lg", "text-sm", "px-5", "py-2.5", "text-center", "me-2", "mb-2"}>{text}</span>
 }
 
+templ selectInput(param string, options [][]string, selected string) {
+//     <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+//     <option selected>Choose a country</option>
+//     <option value="US">United States</option>
+//     <option value="CA">Canada</option>
+//     <option value="FR">France</option>
+//     <option value="DE">Germany</option>
+//   </select>
+    <select id={param} name={param} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        if selected == "" {
+            <option value="" selected>All {param}s</option>
+        } else {
+            <option value="">All {param}s</option>
+        }
+        for _, option := range options {
+            if option[0] == selected {
+                <option value={option[0]} selected>{option[1]}</option>
+            } else {
+                <option value={option[0]}>{option[1]}</option>
+            }
+        }
+    </select>
+}
+
 templ AssetSummaryPage(summary models.Summary) {
     @rawPage("Assets List") {
         <div class="px-4 sm:px-8 m-auto pt-2">
             <div class="flex flex-col">
                 <div class="flex flex-row justify-between items-center">
-                    <a href="/" class="text-4xl">Assets</a>
-                    <p class="text-base text-gray-500">Total: {utils.FormatBRL(summary.Total)}</p>
+                    <div class="flex flex-row items-end gap-4">
+                        <a href="/" class="text-4xl">Assets</a>
+                        <p class="text-base text-gray-500">{utils.FormatBRL(summary.Total)}</p>
+                    </div>
+                    <form class="flex flex-row justify-between items-center gap-4 min-w-md" hx-trigger="change" hx-get="/assets-redirect" hx-target="this" hx-push-url="true">
+                        @selectInput("type", summary.AssetTypes, summary.SelectedType)
+                        @selectInput("wallet", summary.Wallets, summary.SelectedWallet)
+                    </form>
                 </div>
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
                     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">

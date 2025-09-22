@@ -12,6 +12,7 @@ func SetupRoutes(se *core.ServeEvent) error {
 
 	// /assets?wallet=XXX -> asset list (home)
 	se.Router.GET("/assets", assetList)
+	se.Router.GET("/assets-redirect", assetRedirect)
 
 	// get  new asset popup
 	// post new asset

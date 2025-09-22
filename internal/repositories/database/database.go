@@ -45,24 +45,39 @@ var GetCurrentSummaryQuery = `
 		ap.logged_at DESC
 `
 
-func (db *database) GetCurrentSummary(wallet string) ([]models.AssetAggregate, error) {
+func (db *database) GetCurrentSummary(wallet string, asset_type string) ([]models.AssetAggregate, error) {
 	var assets []models.AssetAggregate
 	if err := db.app.DB().NewQuery(GetCurrentSummaryQuery).All(&assets); err != nil {
 		return nil, err
 	}
 
-	if wallet == "" {
-		return assets, nil
-	}
-
 	var filtered []models.AssetAggregate
 	for _, asset := range assets {
-		if asset.Wallet == wallet {
-			filtered = append(filtered, asset)
+		if wallet != "" && asset.Wallet != wallet {
+			continue
 		}
+
+		if asset_type != "" && asset.Type != asset_type {
+			continue
+		}
+
+		filtered = append(filtered, asset)
 	}
 
 	return filtered, nil
+}
+
+var ListWalletsQuery = `
+	SELECT id, name FROM wallets
+`
+
+func (db *database) ListWallets() ([]models.Wallet, error) {
+	var wallets []models.Wallet
+	if err := db.app.DB().NewQuery(ListWalletsQuery).All(&wallets); err != nil {
+		return nil, err
+	}
+
+	return wallets, nil
 }
 
 // func (db *database) GetCurrentSummary(wallet string) ([]models.Asset, error) {
