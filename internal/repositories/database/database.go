@@ -40,6 +40,9 @@ var GetCurrentSummaryQuery = `
 		a.id = ap.asset_id AND 
 		a.wallet = w.id AND
 		ap.logged_at = (SELECT MAX(logged_at) FROM asset_prices WHERE asset_id = a.id)
+	ORDER BY
+		w.name,
+		ap.logged_at DESC
 `
 
 func (db *database) GetCurrentSummary(wallet string) ([]models.AssetAggregate, error) {
