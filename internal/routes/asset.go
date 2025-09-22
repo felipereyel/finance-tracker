@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fintracker/internal/components"
+	"fintracker/internal/models"
 	"fintracker/internal/repositories/database"
 
 	"github.com/pocketbase/pocketbase/core"
@@ -15,12 +16,21 @@ func assetList(e *core.RequestEvent) error {
 	db := database.NewDatabaseRepo(e.App)
 	wallet := e.Request.URL.Query().Get("wallet")
 
-	assets, err := db.ListAssets(wallet)
+	aggregated, err := db.GetCurrentSummary(wallet)
 	if err != nil {
 		return err
 	}
 
-	return sendPage(e, components.AssetListPage(assets))
+	summary := models.Summary{
+		Aggregates: make([]models.AssetAggregate, 0),
+	}
+
+	for _, asset := range aggregated {
+		summary.Total += asset.LastPrice
+		summary.Aggregates = append(summary.Aggregates, asset)
+	}
+
+	return sendPage(e, components.AssetSummaryPage(summary))
 }
 
 // func taskNew(tc *controllers.PriceController, c *fiber.Ctx, user models.User) error {

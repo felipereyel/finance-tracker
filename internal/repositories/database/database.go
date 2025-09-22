@@ -3,7 +3,6 @@ package database
 import (
 	"fintracker/internal/models"
 
-	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -21,16 +20,58 @@ func NewDatabaseRepo(app core.App) database {
 // 	return err
 // }
 
-func (db *database) ListAssets(wallet string) ([]models.Asset, error) {
-	baseQuery := db.app.DB().Select(models.AssetFields...).From("assets").AndWhere(dbx.HashExp{"sell_date": nil})
-	if wallet != "" {
-		baseQuery = baseQuery.AndWhere(dbx.HashExp{"wallet": wallet})
+var GetCurrentSummaryQuery = `
+	SELECT 
+		a.id,
+		a.name,
+		a.type,
+		a.wallet,
+		w.name as wallet_name,
+		a.initial_price,
+		a.buy_date,
+		ap.value as last_price,
+		ap.logged_at as last_date
+	FROM 
+		assets a,
+		asset_prices ap,
+		wallets w
+	WHERE 
+		a.sell_date = '' AND
+		a.id = ap.asset_id AND 
+		a.wallet = w.id AND
+		ap.logged_at = (SELECT MAX(logged_at) FROM asset_prices WHERE asset_id = a.id)
+`
+
+func (db *database) GetCurrentSummary(wallet string) ([]models.AssetAggregate, error) {
+	var assets []models.AssetAggregate
+	if err := db.app.DB().NewQuery(GetCurrentSummaryQuery).All(&assets); err != nil {
+		return nil, err
 	}
 
-	var assets []models.Asset
-	err := baseQuery.All(&assets)
-	return assets, err
+	if wallet == "" {
+		return assets, nil
+	}
+
+	var filtered []models.AssetAggregate
+	for _, asset := range assets {
+		if asset.Wallet == wallet {
+			filtered = append(filtered, asset)
+		}
+	}
+
+	return filtered, nil
 }
+
+// func (db *database) GetCurrentSummary(wallet string) ([]models.Asset, error) {
+// 	baseQuery := db.app.DB().Select(models.AssetFields...).From("assets").AndWhere(dbx.HashExp{"sell_date": ""})
+// 	if wallet != "" {
+// 		baseQuery = baseQuery.AndWhere(dbx.HashExp{"wallet": wallet})
+// 	}
+
+// 	var assets []models.Asset
+// 	err := baseQuery.All(&assets)
+// 	return assets, err
+// }
 
 // func (db *database) RetrieveTaskById(taskId string) (models.Task, error) {
 // 	query := `SELECT id, title, owner_id, description FROM tasks WHERE id = ?`

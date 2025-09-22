@@ -2,6 +2,23 @@ package models
 
 // Type:  "fii" | "federal_bond" | "cdb" | "hedge_fund" | "stock" | "other"
 
+type AssetAggregate struct {
+	Id           string  `json:"id"`
+	Name         string  `json:"name"`
+	Type         string  `json:"type"`
+	Wallet       string  `json:"wallet"`
+	WalletName   string  `json:"wallet_name"`
+	InitialPrice float32 `json:"initial_price"`
+	BuyDate      string  `json:"buy_date"`
+	LastPrice    float32 `json:"last_price"`
+	LastDate     string  `json:"last_date"`
+}
+
+type Summary struct {
+	Total      float32
+	Aggregates []AssetAggregate
+}
+
 type Asset struct {
 	Id           string  `json:"id"`
 	Created      string  `json:"created"`
@@ -11,7 +28,7 @@ type Asset struct {
 	Wallet       string  `json:"wallet"`
 	Comment      string  `json:"comment"` // nullable
 	InitialPrice float32 `json:"initial_price"`
-	Bought       string  `json:"buy_date"`
+	BuyDate      string  `json:"buy_date"`
 	Sold         string  `json:"sell_date"` // nullable
 }
 
