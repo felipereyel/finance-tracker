@@ -73,6 +73,11 @@ type AssetCreateDTO struct {
 	SellDate     string  `form:"sell_date"` // nullable
 }
 
+type AssetUpdateDTO struct {
+	Comment  string `form:"comment"`   // nullable
+	SellDate string `form:"sell_date"` // nullable
+}
+
 var AssetFields = []string{"id", "created", "updated", "name", "type", "wallet", "comment", "initial_price", "buy_date", "sell_date"}
 
 var EmptyAsset = Asset{}

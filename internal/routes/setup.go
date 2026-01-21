@@ -16,13 +16,13 @@ func SetupRoutes(se *core.ServeEvent) error {
 	se.Router.POST("/assets", assetCreate)
 
 	se.Router.GET("/assets/{asset_id}", assetDetails)
-	// put asset
+	se.Router.POST("/assets/{asset_id}", assetUpdate)
 
 	se.Router.GET("/assets/{asset_id}/price-popup", priceCreatePopup)
 	se.Router.POST("/assets/{asset_id}/prices", priceCreate)
 
 	se.Router.GET("/prices/{price_id}", priceDetails)
-	// put asset price
+	se.Router.POST("/prices/{price_id}", priceUpdate)
 
 	// app.Get("/", uc, tc, taskList)
 	// app.Get("/new", uc, tc, taskNew)

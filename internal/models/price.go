@@ -18,6 +18,10 @@ type PriceCreateDTO struct {
 	Comment  string  `form:"comment"` // nullable
 }
 
+type PriceUpdateDTO struct {
+	Comment string `form:"comment"` // nullable
+}
+
 var EmptyPrice = Price{}
 
 func CreateNewPrice(dto PriceCreateDTO) Price {

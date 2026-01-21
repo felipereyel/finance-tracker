@@ -117,20 +117,36 @@ func assetDetails(e *core.RequestEvent) error {
 		return err
 	}
 
-	return sendPage(e, components.AssetDetailsPage(asset))
+	prices, err := db.ListPricesByAssetId(assetId)
+	if err != nil {
+		fmt.Println("Error retrieving prices:", err)
+		return err
+	}
+
+	return sendPage(e, components.AssetDetailsPage(asset, prices))
 }
 
-// func taskSave(tc *controllers.PriceController, c *fiber.Ctx, user models.User) error {
-// 	var taskId = c.Params("id")
-// 	var taskChange controllers.TaskChange
-// 	err := c.BodyParser(&taskChange)
-// 	if err != nil {
-// 		return err
-// 	}
+func assetUpdate(e *core.RequestEvent) error {
+	db := database.NewDatabaseRepo(e.App)
+	assetId := e.Request.PathValue("asset_id")
 
-// 	if err := tc.UpdateTask(user.ID, taskId, taskChange); err != nil {
-// 		return err
-// 	}
+	assetDTO := models.AssetUpdateDTO{}
+	if err := e.BindBody(&assetDTO); err != nil {
+		return err
+	}
 
-// 	return c.SendStatus(fiber.StatusOK)
-// }
+	asset, err := db.GetAssetById(assetId)
+	if err != nil {
+		return err
+	}
+
+	asset.SellDate = assetDTO.SellDate
+	asset.Comment = assetDTO.Comment
+	asset.Updated = models.GenerateTimestamp()
+
+	if err := db.UpdateAsset(asset); err != nil {
+		return err
+	}
+
+	return e.JSON(200, map[string]any{"success": true})
+}

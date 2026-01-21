@@ -185,7 +185,7 @@ templ NewAsset(summary models.NewAssetSummary) {
 }
 
 
-templ AssetDetailsPage(summary models.AssetAggregate) {
+templ AssetDetailsPage(summary models.AssetAggregate, prices []models.Price) {
 	@rawPage(summary.Name + " | Asset Details") {
 		<div class="px-4 sm:px-8 m-auto pt-2">
 			<div class="flex flex-col">
@@ -202,7 +202,7 @@ templ AssetDetailsPage(summary models.AssetAggregate) {
 					</div>
 				</div>
 				<div class="relative overflow-x-auto rounded mt-4">
-					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-post={ templ.URL("/assets/" + summary.Id + "/edit") } hx-target="#modal" hx-swap="delete" hx-trigger="change">
+					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-swap="none" hx-post={ templ.URL("/assets/" + summary.Id) }>
 						<div class="flex flex-row gap-4">
 							<div class="flex flex-col gap-2 w-1/2">
 								<label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">
@@ -220,7 +220,7 @@ templ AssetDetailsPage(summary models.AssetAggregate) {
 								<label for="type" class="block text-sm font-medium text-gray-900 dark:text-white">
 									Asset Type
 								</label>
-								<input name="type" id="type" type="text" value={ models.GetLabelForType(summary.Type) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>	
+								<input name="type" id="type" type="text" value={ models.GetLabelForType(summary.Type) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
 							</div>
 						</div>
 						<div class="flex flex-row gap-4">
@@ -228,7 +228,7 @@ templ AssetDetailsPage(summary models.AssetAggregate) {
 								<label for="initial_price" class="block text-sm font-medium text-gray-900 dark:text-white">
 									Initial Price ({ utils.FormatDateTime(summary.BuyDate) })
 								</label>
-								<input name="initial_price" id="initial_price" type="text" value={ utils.FormatBRL(summary.InitialPrice) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>	
+								<input name="initial_price" id="initial_price" type="text" value={ utils.FormatBRL(summary.InitialPrice) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
 							</div>
 							<div class="flex flex-col gap-2 w-1/2">
 								<label for="last_price" class="block text-sm font-medium text-gray-900 dark:text-white">
@@ -249,7 +249,39 @@ templ AssetDetailsPage(summary models.AssetAggregate) {
 							</label>
 							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{ summary.Comment }</textarea>
 						</div>
+						<button type="submit" class="w-full text-white text-center px-4 py-2 bg-blue-600 hover:bg-sky-100 hover:text-sky-900 border border-slate-600 rounded overflow-hidden shadow-md">
+							Save
+						</button>
 					</form>
+				</div>
+
+				<div class="relative overflow-x-auto sm:rounded-lg mt-4">
+					<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+						<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+							<tr>
+								<th scope="col" class="px-6 py-3">
+									Date
+								</th>
+								<th scope="col" class="px-6 py-3">
+									Value
+								</th>
+								<th scope="col" class="px-6 py-3">
+									Gain
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, price := range prices {
+								<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+									<td class="px-6 py-4">
+										<a href={ templ.URL("/prices/" + price.Id) }>{ utils.FormatDateTime(price.LoggedAt) }</a>
+									</td>
+									<td class="px-6 py-4">{ utils.FormatBRL(price.Value) }</td>
+									<td class="px-6 py-4">{ utils.FormatBRL(price.Gain) }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -309,24 +341,21 @@ templ PricePage(summary models.Price) {
 					<div class="flex flex-row items-center gap-4">
 						<a href="/" class="text-4xl">Assets</a>
 						<p>></p>
-						<a href={ templ.URL("/assets/" + summary.AssetId) } class="text-xl">
+						<a href={ templ.URL("/assets/" + summary.AssetId) } class="text-xl">Asset</a>
+						<p>></p>
+						<a href={ templ.URL("/prices/" + summary.Id) } class="text-xl">
 						 	Price Details
 						</a>
 					</div>
-					<div class="flex flex-row justify-between items-center gap-4">
-						<button hx-get={ templ.URL("/assets/" + summary.Id + "/price-popup") } hx-target="#body" hx-swap="beforeend" class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-							Save
-						</button>
-					</div>
 				</div>
 				<div class="relative overflow-x-auto rounded mt-4">
-					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-post={ templ.URL("/assets/" + summary.Id + "/edit") } hx-target="#modal" hx-swap="delete" hx-trigger="change">
+					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-swap="none" hx-post={ templ.URL("/prices/" + summary.Id) }>
 						<div class="flex flex-row gap-4">
 							<div class="flex flex-col gap-2 w-1/2">
 								<label for="value" class="block text-sm font-medium text-gray-900 dark:text-white">
 									Value ({ utils.FormatDateTime(summary.LoggedAt) })
 								</label>
-								<input name="value" id="value" type="text" value={ utils.FormatBRL(summary.Value) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>	
+								<input name="value" id="value" type="text" value={ utils.FormatBRL(summary.Value) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
 							</div>
 							<div class="flex flex-col gap-2 w-1/2">
 								<label for="gain" class="block text-sm font-medium text-gray-900 dark:text-white">
@@ -341,6 +370,9 @@ templ PricePage(summary models.Price) {
 							</label>
 							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{ summary.Comment }</textarea>
 						</div>
+						<button type="submit" class="w-full text-white text-center px-4 py-2 bg-blue-600 hover:bg-sky-100 hover:text-sky-900 border border-slate-600 rounded overflow-hidden shadow-md">
+							Save
+						</button>
 					</form>
 				</div>
 			</div>
