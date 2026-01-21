@@ -196,6 +196,9 @@ templ AssetDetailsPage(summary models.AssetAggregate) {
 						<a href={ templ.URL("/assets/" + summary.Id) } class="text-xl">{ summary.Name }</a>
 					</div>
 					<div class="flex flex-row justify-between items-center gap-4">
+						<button hx-get={ templ.URL("/assets/" + summary.Id + "/price-popup") } hx-target="#body" hx-swap="beforeend" class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+							New Price
+						</button>
 					</div>
 				</div>
 				<div class="relative overflow-x-auto rounded mt-4">
@@ -253,3 +256,94 @@ templ AssetDetailsPage(summary models.AssetAggregate) {
 	}
 }
 
+templ NewPrice(summary models.AssetAggregate) {
+	<div id="modal" hx-get="/discard" hx-target="#modal" hx-swap="delete" hx-trigger="click target:#modal" class="flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm">
+		<div id="modal-content" class="relative p-4 w-full max-w-md max-h-full">
+			<!-- Modal content -->
+			<div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+				<!-- Modal header -->
+				<div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+					<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+						Create New Price
+					</h3>
+					<button hx-get="/discard" hx-target="#modal" hx-swap="delete" type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+						<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+						</svg>
+						<span class="sr-only">Close</span>
+					</button>
+				</div>
+				<!-- Modal body -->
+				<div class="p-4 md:p-5">
+					<form class="space-y-4" hx-post={ templ.URL("/assets/" + summary.Id + "/prices") } hx-target="#modal" hx-swap="delete">
+						<div class="flex flex-col gap-2">
+							<label for="value" class="block text-sm font-medium text-gray-900 dark:text-white">
+								Price
+							</label>
+							<input name="value" id="value" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required/>
+							<label for="logged_at" class="block text-sm font-medium text-gray-900 dark:text-white">
+								Log Date
+							</label>
+							<input value={models.GenerateDate()} name="logged_at" id="logged_at" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required/>
+							<label for="comment" class="block text-sm font-medium text-gray-900 dark:text-white">
+								Comment
+							</label>
+							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"></textarea>
+						</div>
+						<button type="submit" class="w-full text-white text-center px-4 py-2 bg-blue-600 hover:bg-sky-100 hover:text-sky-900 border border-slate-600 rounded overflow-hidden shadow-md">
+							Add
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+
+templ PricePage(summary models.Price) {
+	@rawPage("Price Details") {
+		<div class="px-4 sm:px-8 m-auto pt-2">
+			<div class="flex flex-col">
+				<div class="flex flex-row justify-between items-center">
+					<div class="flex flex-row items-center gap-4">
+						<a href="/" class="text-4xl">Assets</a>
+						<p>></p>
+						<a href={ templ.URL("/assets/" + summary.AssetId) } class="text-xl">
+						 	Price Details
+						</a>
+					</div>
+					<div class="flex flex-row justify-between items-center gap-4">
+						<button hx-get={ templ.URL("/assets/" + summary.Id + "/price-popup") } hx-target="#body" hx-swap="beforeend" class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+							Save
+						</button>
+					</div>
+				</div>
+				<div class="relative overflow-x-auto rounded mt-4">
+					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-post={ templ.URL("/assets/" + summary.Id + "/edit") } hx-target="#modal" hx-swap="delete" hx-trigger="change">
+						<div class="flex flex-row gap-4">
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="value" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Value ({ utils.FormatDateTime(summary.LoggedAt) })
+								</label>
+								<input name="value" id="value" type="text" value={ utils.FormatBRL(summary.Value) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>	
+							</div>
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="gain" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Gain
+								</label>
+								<input name="gain" id="gain" type="text" value={ utils.FormatBRL(summary.Gain) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
+							</div>
+						</div>
+						<div class="flex flex-col gap-2">
+							<label for="comment" class="block text-sm font-medium text-gray-900 dark:text-white">
+								Comment
+							</label>
+							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{ summary.Comment }</textarea>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	}
+}

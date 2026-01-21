@@ -92,10 +92,10 @@ func assetCreate(e *core.RequestEvent) error {
 	}
 
 	priceDTO := models.PriceCreateDTO{
-		AssetId: newAsset.Id,
-		Value:   newAsset.InitialPrice,
-		Logged:  newAsset.BuyDate,
-		Comment: "Initial price",
+		AssetId:  newAsset.Id,
+		Value:    newAsset.InitialPrice,
+		LoggedAt: newAsset.BuyDate,
+		Comment:  "Initial price",
 	}
 
 	newPrice := models.CreateNewPrice(priceDTO)
@@ -119,26 +119,6 @@ func assetDetails(e *core.RequestEvent) error {
 
 	return sendPage(e, components.AssetDetailsPage(asset))
 }
-
-// func taskNew(tc *controllers.PriceController, c *fiber.Ctx, user models.User) error {
-// 	task, err := tc.CreateTask(user.ID)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return c.Redirect("/edit/" + task.Id)
-// }
-
-// func taskEdit(tc *controllers.PriceController, c *fiber.Ctx, user models.User) error {
-// 	taskId := c.Params("id")
-// 	task, err := tc.RetrieveTask(user.ID, taskId)
-
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return sendPage(c, components.TaskEditPage(task))
-// }
 
 // func taskSave(tc *controllers.PriceController, c *fiber.Ctx, user models.User) error {
 // 	var taskId = c.Params("id")

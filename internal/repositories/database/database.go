@@ -34,6 +34,8 @@ func (db *database) CreateAsset(asset models.Asset) error {
 		"initial_price": asset.InitialPrice,
 		"buy_date":      asset.BuyDate,
 		"comment":       asset.Comment,
+		"created":       asset.Created,
+		"updated":       asset.Updated,
 	}).Execute()
 
 	if err != nil {
@@ -114,9 +116,11 @@ func (db *database) CreatePrice(price models.Price) error {
 		"id":        price.Id,
 		"asset_id":  price.AssetId,
 		"value":     price.Value,
-		"logged_at": price.Logged,
+		"logged_at": price.LoggedAt,
 		"gain":      price.Gain,
 		"comment":   price.Comment,
+		"created":   price.Created,
+		"updated":   price.Updated,
 	}).Execute()
 
 	if err != nil {
@@ -133,4 +137,13 @@ func (db *database) CreatePrice(price models.Price) error {
 	}
 
 	return nil
+}
+
+func (db *database) GetPriceById(priceId string) (models.Price, error) {
+	var price models.Price
+	if err := db.app.DB().Select("id", "asset_id", "value", "logged_at", "gain", "comment", "created", "updated").From("asset_prices").Where(dbx.HashExp{"id": priceId}).One(&price); err != nil {
+		return models.Price{}, err
+	}
+
+	return price, nil
 }
