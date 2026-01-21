@@ -33,16 +33,21 @@ type Summary struct {
 	SelectedWallet string
 }
 
+type NewAssetSummary struct {
+	AssetTypes [][]string
+	Wallets    [][]string
+}
+
 type Asset struct {
 	Id           string  `json:"id"`
 	Created      string  `json:"created"`
 	Updated      string  `json:"updated"`
-	Name         string  `json:"name"`
-	Type         string  `json:"type"`
-	Wallet       string  `json:"wallet"`
-	Comment      string  `json:"comment"` // nullable
-	InitialPrice float32 `json:"initial_price"`
-	BuyDate      string  `json:"buy_date"`
+	Name         string  `json:"name" form:"name"`
+	Type         string  `json:"type" form:"type"`
+	Wallet       string  `json:"wallet" form:"wallet"`
+	Comment      string  `json:"comment" form:"comment"` // nullable
+	InitialPrice float32 `json:"initial_price" form:"initial_price"`
+	BuyDate      string  `json:"buy_date" form:"buy_date"`
 	Sold         string  `json:"sell_date"` // nullable
 }
 

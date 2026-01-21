@@ -2,7 +2,9 @@ package database
 
 import (
 	"fintracker/internal/models"
+	"fmt"
 
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -14,11 +16,32 @@ func NewDatabaseRepo(app core.App) database {
 	return database{app}
 }
 
-// func (db *database) CreateTask(task models.Task) error {
-// 	query := `INSERT INTO tasks (id, title, description, owner_id) VALUES (?, ?, ?, ?)`
-// 	_, err := db.conn.Exec(query, task.Id, task.Title, task.Description, task.OwnerId)
-// 	return err
-// }
+func (db *database) CreateAsset(asset models.Asset) error {
+	result, err := db.app.DB().Insert("assets", dbx.Params{
+		"id":            asset.Id,
+		"name":          asset.Name,
+		"type":          asset.Type,
+		"wallet":        asset.Wallet,
+		"initial_price": asset.InitialPrice,
+		"buy_date":      asset.BuyDate,
+		"comment":       asset.Comment,
+	}).Execute()
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no rows affected when inserting asset")
+	}
+
+	return nil
+}
 
 var GetCurrentSummaryQuery = `
 	SELECT 
@@ -67,83 +90,37 @@ func (db *database) GetCurrentSummary(wallet string, asset_type string) ([]model
 	return filtered, nil
 }
 
-var ListWalletsQuery = `
-	SELECT id, name FROM wallets
-`
-
 func (db *database) ListWallets() ([]models.Wallet, error) {
 	var wallets []models.Wallet
-	if err := db.app.DB().NewQuery(ListWalletsQuery).All(&wallets); err != nil {
+	if err := db.app.DB().Select("id", "name").From("wallets").All(&wallets); err != nil {
 		return nil, err
 	}
 
 	return wallets, nil
 }
 
-// func (db *database) GetCurrentSummary(wallet string) ([]models.Asset, error) {
-// 	baseQuery := db.app.DB().Select(models.AssetFields...).From("assets").AndWhere(dbx.HashExp{"sell_date": ""})
-// 	if wallet != "" {
-// 		baseQuery = baseQuery.AndWhere(dbx.HashExp{"wallet": wallet})
-// 	}
+func (db *database) CreatePrice(price models.Price) error {
+	result, err := db.app.DB().Insert("asset_prices", dbx.Params{
+		"id":        price.Id,
+		"asset_id":  price.AssetId,
+		"value":     price.Value,
+		"logged_at": price.Logged,
+		"gain":      price.Gain,
+		"comment":   price.Comment,
+	}).Execute()
 
-// 	var assets []models.Asset
-// 	err := baseQuery.All(&assets)
-// 	return assets, err
-// }
+	if err != nil {
+		return err
+	}
 
-// func (db *database) RetrieveTaskById(taskId string) (models.Task, error) {
-// 	query := `SELECT id, title, owner_id, description FROM tasks WHERE id = ?`
-// 	row := db.conn.QueryRow(query, taskId)
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
 
-// 	var task models.Task
-// 	err := row.Scan(&task.Id, &task.Title, &task.OwnerId, &task.Description)
-// 	if err != nil {
-// 		return models.EmptyTask, err
-// 	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("no rows affected when inserting price")
+	}
 
-// 	return task, nil
-// }
-
-// func (db *database) DeleteTask(taskId string) error {
-// 	query := `DELETE FROM tasks WHERE id = ?`
-// 	_, err := db.conn.Exec(query, taskId)
-// 	return err
-// }
-
-// func (db *database) UpdateTask(task models.Task) error {
-// 	query := `UPDATE tasks SET title = ?, description = ? WHERE id = ?`
-// 	_, err := db.conn.Exec(query, task.Title, task.Description, task.Id)
-// 	return err
-// }
-
-// func (db *database) InsertUser(user models.User) error {
-// 	query := `INSERT INTO users (id, username, pswd_hash) VALUES (?, ?, ?)`
-// 	_, err := db.conn.Exec(query, user.ID, user.Username, user.PswdHash)
-// 	return err
-// }
-
-// func (db *database) RetrieveUserByName(username string) (models.User, error) {
-// 	query := `SELECT id, username, pswd_hash FROM users WHERE username = ?`
-// 	row := db.conn.QueryRow(query, username)
-
-// 	var user models.User
-// 	err := row.Scan(&user.ID, &user.Username, &user.PswdHash)
-// 	if err != nil {
-// 		return models.EmptyUser, err
-// 	}
-
-// 	return user, nil
-// }
-
-// func (db *database) RetrieveUserById(id string) (models.User, error) {
-// 	query := `SELECT id, username, pswd_hash FROM users WHERE id = ?`
-// 	row := db.conn.QueryRow(query, id)
-
-// 	var user models.User
-// 	err := row.Scan(&user.ID, &user.Username, &user.PswdHash)
-// 	if err != nil {
-// 		return models.EmptyUser, err
-// 	}
-
-// 	return user, nil
-// }
+	return nil
+}

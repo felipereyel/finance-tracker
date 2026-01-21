@@ -3,7 +3,14 @@ module fintracker
 go 1.24.1
 
 require (
-	github.com/a-h/templ v0.3.943 // indirect
+	github.com/a-h/templ v0.3.943
+	github.com/joho/godotenv v1.5.1
+	github.com/leekchan/accounting v1.0.0
+	github.com/pocketbase/pocketbase v0.26.1
+	modernc.org/sqlite v1.36.1
+)
+
+require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
@@ -16,14 +23,11 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
-	github.com/leekchan/accounting v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/pocketbase/dbx v1.11.0 // indirect
-	github.com/pocketbase/pocketbase v0.26.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
@@ -40,5 +44,4 @@ require (
 	modernc.org/libc v1.61.13 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.8.2 // indirect
-	modernc.org/sqlite v1.36.1 // indirect
 )

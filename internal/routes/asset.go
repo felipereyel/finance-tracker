@@ -8,10 +8,6 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
-func homeRedirect(e *core.RequestEvent) error {
-	return e.Redirect(302, "/assets")
-}
-
 func assetList(e *core.RequestEvent) error {
 	db := database.NewDatabaseRepo(e.App)
 	wallet := e.Request.URL.Query().Get("wallet")
@@ -54,6 +50,65 @@ func assetRedirect(e *core.RequestEvent) error {
 	wallet := e.Request.URL.Query().Get("wallet")
 	asset_type := e.Request.URL.Query().Get("type")
 	e.Response.Header().Set("HX-Redirect", "/assets?wallet="+wallet+"&type="+asset_type)
+	return e.JSON(200, map[string]any{"success": true})
+}
+
+func assetCreatePopup(e *core.RequestEvent) error {
+	db := database.NewDatabaseRepo(e.App)
+
+	// TODO: init popup with selected fiels based in query
+	// wallet := e.Request.URL.Query().Get("wallet")
+	// asset_type := e.Request.URL.Query().Get("type")
+
+	wallets, err := db.ListWallets()
+	if err != nil {
+		return err
+	}
+
+	summary := models.NewAssetSummary{
+		AssetTypes: models.AssetTypes,
+		Wallets:    make([][]string, 0),
+	}
+
+	for _, wallet := range wallets {
+		summary.Wallets = append(summary.Wallets, []string{wallet.Id, wallet.Name})
+	}
+
+	return sendPage(e, components.NewAsset(summary))
+}
+
+func assetCreate(e *core.RequestEvent) error {
+	db := database.NewDatabaseRepo(e.App)
+
+	newAsset := models.Asset{
+		Id:      models.GenerateId(),
+		Created: models.GenerateTimestamp(),
+		Updated: models.GenerateTimestamp(),
+	}
+
+	if err := e.BindBody(&newAsset); err != nil {
+		return err
+	}
+
+	if err := db.CreateAsset(newAsset); err != nil {
+		return err
+	}
+
+	newPrice := models.Price{
+		Id:      models.GenerateId(),
+		Created: models.GenerateTimestamp(),
+		Updated: models.GenerateTimestamp(),
+		AssetId: newAsset.Id,
+		Value:   newAsset.InitialPrice,
+		Logged:  newAsset.BuyDate,
+		Comment: "Initial price",
+	}
+
+	if err := db.CreatePrice(newPrice); err != nil {
+		return err
+	}
+
+	e.Response.Header().Set("HX-Redirect", "/assets/"+newAsset.Id)
 	return e.JSON(200, map[string]any{"success": true})
 }
 

@@ -5,8 +5,6 @@ import (
 )
 
 func SetupRoutes(se *core.ServeEvent) error {
-	// dbRepo := database.NewDatabaseRepo(se.App)
-
 	// / -> redirect to /assets
 	se.Router.GET("/", homeRedirect)
 
@@ -14,8 +12,8 @@ func SetupRoutes(se *core.ServeEvent) error {
 	se.Router.GET("/assets", assetList)
 	se.Router.GET("/assets-redirect", assetRedirect)
 
-	// get  new asset popup
-	// post new asset
+	se.Router.GET("/assets-popup", assetCreatePopup)
+	se.Router.POST("/assets", assetCreate)
 
 	// get asset
 	// put asset
@@ -31,8 +29,22 @@ func SetupRoutes(se *core.ServeEvent) error {
 	// app.Post("/edit/:id", uc, tc, taskSave)
 
 	se.Router.GET("/statics/{path...}", assetsHandler)
-	// app.Use("/healthz", healthzHandler)
+	se.Router.GET("/discard", discardHandler)
+	se.Router.GET("/healthz", healthzHandler)
+
 	// app.Use(notFoundHandler)
 
 	return se.Next()
+}
+
+func discardHandler(e *core.RequestEvent) error {
+	return e.JSON(200, map[string]any{"success": true})
+}
+
+func healthzHandler(e *core.RequestEvent) error {
+	return e.JSON(200, map[string]any{"success": true})
+}
+
+func homeRedirect(e *core.RequestEvent) error {
+	return e.Redirect(302, "/assets")
 }
