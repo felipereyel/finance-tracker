@@ -10,6 +10,16 @@ var AssetTypes = [][]string{
 	{"other", "Other"},
 }
 
+func GetLabelForType(assetType string) string {
+	for _, at := range AssetTypes {
+		if at[0] == assetType {
+			return at[1]
+		}
+	}
+
+	return "Unknown"
+}
+
 type AssetAggregate struct {
 	Id           string  `json:"id"`
 	Name         string  `json:"name"`
@@ -20,6 +30,8 @@ type AssetAggregate struct {
 	BuyDate      string  `json:"buy_date"`
 	LastPrice    float32 `json:"last_price"`
 	LastDate     string  `json:"last_date"`
+	SellDate     string  `json:"sell_date"`
+	Comment      string  `json:"comment"`
 }
 
 type Summary struct {
@@ -48,7 +60,7 @@ type Asset struct {
 	Comment      string  `json:"comment" form:"comment"` // nullable
 	InitialPrice float32 `json:"initial_price" form:"initial_price"`
 	BuyDate      string  `json:"buy_date" form:"buy_date"`
-	Sold         string  `json:"sell_date"` // nullable
+	SellDate     string  `json:"sell_date"` // nullable
 }
 
 var AssetFields = []string{"id", "created", "updated", "name", "type", "wallet", "comment", "initial_price", "buy_date", "sell_date"}

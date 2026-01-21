@@ -15,6 +15,9 @@ func SetupRoutes(se *core.ServeEvent) error {
 	se.Router.GET("/assets-popup", assetCreatePopup)
 	se.Router.POST("/assets", assetCreate)
 
+	se.Router.GET("/assets/{asset_id}", assetDetails)
+	se.Router.GET("/assets/{asset_id}/", assetDetails)
+
 	// get asset
 	// put asset
 	// get new price popup

@@ -16,6 +16,15 @@ func NewDatabaseRepo(app core.App) database {
 	return database{app}
 }
 
+func (db *database) ListWallets() ([]models.Wallet, error) {
+	var wallets []models.Wallet
+	if err := db.app.DB().Select("id", "name").From("wallets").All(&wallets); err != nil {
+		return nil, err
+	}
+
+	return wallets, nil
+}
+
 func (db *database) CreateAsset(asset models.Asset) error {
 	result, err := db.app.DB().Insert("assets", dbx.Params{
 		"id":            asset.Id,
@@ -43,7 +52,7 @@ func (db *database) CreateAsset(asset models.Asset) error {
 	return nil
 }
 
-var GetCurrentSummaryQuery = `
+var AssetAggregatesSelectFragment = `
 	SELECT 
 		a.id,
 		a.name,
@@ -53,24 +62,24 @@ var GetCurrentSummaryQuery = `
 		a.initial_price,
 		a.buy_date,
 		ap.value as last_price,
-		ap.logged_at as last_date
+		ap.logged_at as last_date,
+		a.sell_date as sell_date,
+		a.comment as comment
 	FROM 
 		assets a,
 		asset_prices ap,
 		wallets w
 	WHERE 
-		a.sell_date = '' AND
 		a.id = ap.asset_id AND 
 		a.wallet = w.id AND
 		ap.logged_at = (SELECT MAX(logged_at) FROM asset_prices WHERE asset_id = a.id)
-	ORDER BY
-		w.name,
-		ap.logged_at DESC
 `
 
-func (db *database) GetCurrentSummary(wallet string, asset_type string) ([]models.AssetAggregate, error) {
+func (db *database) ListAssetAggregates(wallet string, asset_type string) ([]models.AssetAggregate, error) {
+	var ListAssetAggregatesQuery = AssetAggregatesSelectFragment + ` AND a.sell_date = '' ORDER BY w.name, ap.logged_at DESC`
+
 	var assets []models.AssetAggregate
-	if err := db.app.DB().NewQuery(GetCurrentSummaryQuery).All(&assets); err != nil {
+	if err := db.app.DB().NewQuery(ListAssetAggregatesQuery).All(&assets); err != nil {
 		return nil, err
 	}
 
@@ -90,13 +99,14 @@ func (db *database) GetCurrentSummary(wallet string, asset_type string) ([]model
 	return filtered, nil
 }
 
-func (db *database) ListWallets() ([]models.Wallet, error) {
-	var wallets []models.Wallet
-	if err := db.app.DB().Select("id", "name").From("wallets").All(&wallets); err != nil {
-		return nil, err
+func (db *database) GetAssetAggregateById(assetId string) (models.AssetAggregate, error) {
+	var GetAssetAggregateByIdQuery = AssetAggregatesSelectFragment + ` AND a.id = {:id} LIMIT 1`
+	var asset models.AssetAggregate
+	if err := db.app.DB().NewQuery(GetAssetAggregateByIdQuery).Bind(dbx.Params{"id": assetId}).One(&asset); err != nil {
+		return models.AssetAggregate{}, err
 	}
 
-	return wallets, nil
+	return asset, nil
 }
 
 func (db *database) CreatePrice(price models.Price) error {

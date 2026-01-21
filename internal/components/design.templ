@@ -23,23 +23,6 @@ templ rawPage(title string) {
 	</html>
 }
 
-// Assets Views
-
-// templ AssetEditPage(asset models.Asset) {
-//     @authenticatedPage("asset Editor", fmt.Sprintf("assets > %s", asset.Name), "Edit this asset") {
-//         <div>
-//             <div class="flex flex-col">
-//                 <label for="title" class="text-xs mb-1">Title</label>
-//                 <input hx-post={"/edit/" + asset.Id} type="text" name="title" id="title" value={ asset.Name } class="bg-slate-800 border border-slate-600 rounded px-2 py-1 mb-4" />
-//             </div>
-//             <div class="flex flex-col">
-//                 <label for="description" class="text-xs mb-1">Description</label>
-//                 <textarea hx-post={"/edit/" + asset.Id} name="description" id="description" class="bg-slate-800 border border-slate-600 rounded px-2 py-1 mb-4">{ asset.Comment }</textarea>
-//             </div>
-//         </div>
-//     }
-// }
-
 templ spanTagOutline(text string, color string) {
 	<span class={ fmt.Sprintf("text-%s-700", color), "hover:text-white", "border", fmt.Sprintf("border-%s-700", color), fmt.Sprintf("hover:bg-%s-800", color), "focus:ring-4", "focus:outline-none", fmt.Sprintf("focus:ring-%s-300", color), "font-medium", "rounded-lg", "text-sm", "px-2", "py-1", "text-center", "me-2", "mb-2", fmt.Sprintf("dark:border-%s-500", color), fmt.Sprintf("dark:text-%s-500", color), "dark:hover:text-white", fmt.Sprintf("dark:hover:bg-%s-500", color), fmt.Sprintf("dark:focus:ring-%s-800", color) }>{ text }</span>
 }
@@ -84,7 +67,7 @@ templ AssetSummaryPage(summary models.Summary) {
 						</form>
 					</div>
 				</div>
-				<div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
+				<div class="relative overflow-x-auto sm:rounded-lg mt-4">
 					<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 						<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 							<tr>
@@ -115,13 +98,13 @@ templ AssetSummaryPage(summary models.Summary) {
 							for _, asset := range summary.Aggregates {
 								<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
 									<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-										<a href={ templ.URL("/asset/" + asset.Id) }>{ asset.Name }</a>
+										<a href={ templ.URL("/assets/" + asset.Id) }>{ asset.Name }</a>
 									</th>
 									<td class="px-6 py-4">
 										@spanTagGradientMonochrome(asset.WalletName, utils.StringToColor(asset.WalletName))
 									</td>
 									<td class="px-6 py-4">
-										@spanTagOutline(asset.Type, utils.StringToColor(asset.Type))
+										@spanTagOutline(models.GetLabelForType(asset.Type), utils.StringToColor(asset.Type))
 									</td>
 									<td class="px-6 py-4">{ utils.FormatDateTime(asset.BuyDate) }</td>
 									<td class="px-6 py-4">{ utils.FormatBRL(asset.InitialPrice) }</td>
@@ -200,3 +183,73 @@ templ NewAsset(summary models.NewAssetSummary) {
 		</div>
 	</div>
 }
+
+
+templ AssetDetailsPage(summary models.AssetAggregate) {
+	@rawPage(summary.Name + " | Asset Details") {
+		<div class="px-4 sm:px-8 m-auto pt-2">
+			<div class="flex flex-col">
+				<div class="flex flex-row justify-between items-center">
+					<div class="flex flex-row items-center gap-4">
+						<a href="/" class="text-4xl">Assets</a>
+						<p>></p>
+						<a href={ templ.URL("/assets/" + summary.Id) } class="text-xl">{ summary.Name }</a>
+					</div>
+					<div class="flex flex-row justify-between items-center gap-4">
+					</div>
+				</div>
+				<div class="relative overflow-x-auto rounded mt-4">
+					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-post={ templ.URL("/assets/" + summary.Id + "/edit") } hx-target="#modal" hx-swap="delete" hx-trigger="change">
+						<div class="flex flex-row gap-4">
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Name
+								</label>
+								<input name="name" id="name" type="text" value={ summary.Name } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
+							</div>
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="wallet" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Wallet
+								</label>
+								<input name="wallet" id="wallet" type="text" value={ summary.WalletName } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
+							</div>
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="type" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Asset Type
+								</label>
+								<input name="type" id="type" type="text" value={ models.GetLabelForType(summary.Type) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>	
+							</div>
+						</div>
+						<div class="flex flex-row gap-4">
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="initial_price" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Initial Price ({ utils.FormatDateTime(summary.BuyDate) })
+								</label>
+								<input name="initial_price" id="initial_price" type="text" value={ utils.FormatBRL(summary.InitialPrice) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>	
+							</div>
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="last_price" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Current Price ({ utils.FormatDateTime(summary.LastDate) })
+								</label>
+								<input name="last_price" id="last_price" type="text" value={ utils.FormatBRL(summary.LastPrice) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
+							</div>
+							<div class="flex flex-col gap-2 w-1/2">
+								<label for="sell_date" class="block text-sm font-medium text-gray-900 dark:text-white">
+									Sell Date
+								</label>
+								<input name="sell_date" id="sell_date" type="date" value={ summary.SellDate } class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"/>
+							</div>
+						</div>
+						<div class="flex flex-col gap-2">
+							<label for="comment" class="block text-sm font-medium text-gray-900 dark:text-white">
+								Comment
+							</label>
+							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{ summary.Comment }</textarea>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	}
+}
+

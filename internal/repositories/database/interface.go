@@ -6,8 +6,11 @@ type Database interface {
 	// RetrieveTaskById(taskId string) (models.Task, error)
 	// UpdateTask(task models.Task) error
 
+	ListWallets() ([]models.Wallet, error)
+
 	CreateAsset(asset models.Asset) error
-	ListAssets(wallet string) ([]models.Asset, error)
+	ListAssetAggregates(wallet string, assetType string) ([]models.AssetAggregate, error)
+	GetAssetAggregateById(assetId string) (models.AssetAggregate, error)
 
 	CreatePrice(price models.Price) error
 

@@ -4,6 +4,7 @@ import (
 	"fintracker/internal/components"
 	"fintracker/internal/models"
 	"fintracker/internal/repositories/database"
+	"fmt"
 
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -13,7 +14,7 @@ func assetList(e *core.RequestEvent) error {
 	wallet := e.Request.URL.Query().Get("wallet")
 	asset_type := e.Request.URL.Query().Get("type")
 
-	aggregated, err := db.GetCurrentSummary(wallet, asset_type)
+	aggregated, err := db.ListAssetAggregates(wallet, asset_type)
 	if err != nil {
 		return err
 	}
@@ -110,6 +111,19 @@ func assetCreate(e *core.RequestEvent) error {
 
 	e.Response.Header().Set("HX-Redirect", "/assets/"+newAsset.Id)
 	return e.JSON(200, map[string]any{"success": true})
+}
+
+func assetDetails(e *core.RequestEvent) error {
+	db := database.NewDatabaseRepo(e.App)
+	assetId := e.Request.PathValue("asset_id")
+
+	asset, err := db.GetAssetAggregateById(assetId)
+	if err != nil {
+		fmt.Println("Error retrieving asset:", err)
+		return err
+	}
+
+	return sendPage(e, components.AssetDetailsPage(asset))
 }
 
 // func taskNew(tc *controllers.PriceController, c *fiber.Ctx, user models.User) error {
