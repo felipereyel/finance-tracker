@@ -1,14 +1,33 @@
 package models
 
 type Price struct {
-	Id      string  `json:"id"`
-	Created string  `json:"created"`
-	Updated string  `json:"updated"`
-	AssetId string  `json:"asset_id"`
-	Value   float32 `json:"value"`
-	Logged  string  `json:"logged_at"`
-	Gain    float32 `json:"gain"`
-	Comment string  `json:"comment"` // nullable
+	Id      string
+	Created string
+	Updated string
+	AssetId string
+	Value   float32
+	Logged  string
+	Gain    float32
+	Comment string // nullable
+}
+
+type PriceCreateDTO struct {
+	AssetId string  `form:"asset_id"`
+	Value   float32 `form:"value"`
+	Logged  string  `form:"logged"`
+	Comment string  `form:"comment"` // nullable
 }
 
 var EmptyPrice = Price{}
+
+func CreateNewPrice(dto PriceCreateDTO) Price {
+	return Price{
+		Id:      GenerateId(),
+		Created: GenerateTimestamp(),
+		Updated: GenerateTimestamp(),
+		AssetId: dto.AssetId,
+		Value:   dto.Value,
+		Logged:  dto.Logged,
+		Comment: dto.Comment,
+	}
+}

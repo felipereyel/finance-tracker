@@ -21,17 +21,17 @@ func GetLabelForType(assetType string) string {
 }
 
 type AssetAggregate struct {
-	Id           string  `json:"id"`
-	Name         string  `json:"name"`
-	Type         string  `json:"type"`
-	Wallet       string  `json:"wallet"`
-	WalletName   string  `json:"wallet_name"`
-	InitialPrice float32 `json:"initial_price"`
-	BuyDate      string  `json:"buy_date"`
-	LastPrice    float32 `json:"last_price"`
-	LastDate     string  `json:"last_date"`
-	SellDate     string  `json:"sell_date"`
-	Comment      string  `json:"comment"`
+	Id           string
+	Name         string
+	Type         string
+	Wallet       string
+	WalletName   string
+	InitialPrice float32
+	BuyDate      string
+	LastPrice    float32
+	LastDate     string
+	SellDate     string
+	Comment      string
 }
 
 type Summary struct {
@@ -51,18 +51,43 @@ type NewAssetSummary struct {
 }
 
 type Asset struct {
-	Id           string  `json:"id"`
-	Created      string  `json:"created"`
-	Updated      string  `json:"updated"`
-	Name         string  `json:"name" form:"name"`
-	Type         string  `json:"type" form:"type"`
-	Wallet       string  `json:"wallet" form:"wallet"`
-	Comment      string  `json:"comment" form:"comment"` // nullable
-	InitialPrice float32 `json:"initial_price" form:"initial_price"`
-	BuyDate      string  `json:"buy_date" form:"buy_date"`
-	SellDate     string  `json:"sell_date"` // nullable
+	Id           string
+	Created      string
+	Updated      string
+	Name         string  `form:"name"`
+	Type         string  `form:"type"`
+	Wallet       string  `form:"wallet"`
+	Comment      string  `form:"comment"` // nullable
+	InitialPrice float32 `form:"initial_price"`
+	BuyDate      string  `form:"buy_date"`
+	SellDate     string  `form:"sell_date"` // nullable
+}
+
+type AssetCreateDTO struct {
+	Name         string  `form:"name"`
+	Type         string  `form:"type"`
+	Wallet       string  `form:"wallet"`
+	Comment      string  `form:"comment"` // nullable
+	InitialPrice float32 `form:"initial_price"`
+	BuyDate      string  `form:"buy_date"`
+	SellDate     string  `form:"sell_date"` // nullable
 }
 
 var AssetFields = []string{"id", "created", "updated", "name", "type", "wallet", "comment", "initial_price", "buy_date", "sell_date"}
 
 var EmptyAsset = Asset{}
+
+func CreateNewAsset(dto AssetCreateDTO) Asset {
+	return Asset{
+		Id:           GenerateId(),
+		Created:      GenerateTimestamp(),
+		Updated:      GenerateTimestamp(),
+		Name:         dto.Name,
+		Type:         dto.Type,
+		Wallet:       dto.Wallet,
+		Comment:      dto.Comment,
+		InitialPrice: dto.InitialPrice,
+		BuyDate:      dto.BuyDate,
+		SellDate:     dto.SellDate,
+	}
+}

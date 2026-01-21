@@ -51,3 +51,10 @@ func healthzHandler(e *core.RequestEvent) error {
 func homeRedirect(e *core.RequestEvent) error {
 	return e.Redirect(302, "/assets")
 }
+
+// authRecord := e.Auth
+
+// isGuest := e.Auth == nil
+
+// // the same as "e.Auth != nil && e.Auth.IsSuperuser()"
+// isSuperuser := e.HasSuperuserAuth()

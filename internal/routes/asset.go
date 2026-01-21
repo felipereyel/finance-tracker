@@ -81,30 +81,24 @@ func assetCreatePopup(e *core.RequestEvent) error {
 func assetCreate(e *core.RequestEvent) error {
 	db := database.NewDatabaseRepo(e.App)
 
-	newAsset := models.Asset{
-		Id:      models.GenerateId(),
-		Created: models.GenerateTimestamp(),
-		Updated: models.GenerateTimestamp(),
-	}
-
-	if err := e.BindBody(&newAsset); err != nil {
+	assetDTO := models.AssetCreateDTO{}
+	if err := e.BindBody(&assetDTO); err != nil {
 		return err
 	}
 
+	newAsset := models.CreateNewAsset(assetDTO)
 	if err := db.CreateAsset(newAsset); err != nil {
 		return err
 	}
 
-	newPrice := models.Price{
-		Id:      models.GenerateId(),
-		Created: models.GenerateTimestamp(),
-		Updated: models.GenerateTimestamp(),
+	priceDTO := models.PriceCreateDTO{
 		AssetId: newAsset.Id,
 		Value:   newAsset.InitialPrice,
 		Logged:  newAsset.BuyDate,
 		Comment: "Initial price",
 	}
 
+	newPrice := models.CreateNewPrice(priceDTO)
 	if err := db.CreatePrice(newPrice); err != nil {
 		return err
 	}
