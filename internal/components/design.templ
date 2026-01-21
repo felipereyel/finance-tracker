@@ -196,13 +196,15 @@ templ AssetDetailsPage(summary models.AssetAggregate, prices []models.Price) {
 						<a href={ templ.URL("/assets/" + summary.Id) } class="text-xl">{ summary.Name }</a>
 					</div>
 					<div class="flex flex-row justify-between items-center gap-4">
-						<button hx-get={ templ.URL("/assets/" + summary.Id + "/price-popup") } hx-target="#body" hx-swap="beforeend" class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-							New Price
-						</button>
+						if summary.SellDate == "" {
+							<button hx-get={ templ.URL("/assets/" + summary.Id + "/price-popup") } hx-target="#body" hx-swap="beforeend" class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+								New Price
+							</button>
+						}
 					</div>
 				</div>
 				<div class="relative overflow-x-auto rounded mt-4">
-					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-swap="none" hx-post={ templ.URL("/assets/" + summary.Id) }>
+					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-swap="none" hx-trigger="change" hx-post={ templ.URL("/assets/" + summary.Id) }>
 						<div class="flex flex-row gap-4">
 							<div class="flex flex-col gap-2 w-1/2">
 								<label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">
@@ -238,20 +240,17 @@ templ AssetDetailsPage(summary models.AssetAggregate, prices []models.Price) {
 							</div>
 							<div class="flex flex-col gap-2 w-1/2">
 								<label for="sell_date" class="block text-sm font-medium text-gray-900 dark:text-white">
-									Sell Date
+									Sell Date <p class="text-xs text-gray-500 inline">autosaved</p>
 								</label>
 								<input name="sell_date" id="sell_date" type="date" value={ summary.SellDate } class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"/>
 							</div>
 						</div>
 						<div class="flex flex-col gap-2">
 							<label for="comment" class="block text-sm font-medium text-gray-900 dark:text-white">
-								Comment
+								Comment <p class="text-xs text-gray-500 inline">autosaved</p>
 							</label>
 							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{ summary.Comment }</textarea>
 						</div>
-						<button type="submit" class="w-full text-white text-center px-4 py-2 bg-blue-600 hover:bg-sky-100 hover:text-sky-900 border border-slate-600 rounded overflow-hidden shadow-md">
-							Save
-						</button>
 					</form>
 				</div>
 
@@ -349,7 +348,7 @@ templ PricePage(summary models.Price) {
 					</div>
 				</div>
 				<div class="relative overflow-x-auto rounded mt-4">
-					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-swap="none" hx-post={ templ.URL("/prices/" + summary.Id) }>
+					<form class="flex flex-col gap-4 mt-4 justify-items-stretch" hx-swap="none" hx-trigger="change" hx-post={ templ.URL("/prices/" + summary.Id) }>
 						<div class="flex flex-row gap-4">
 							<div class="flex flex-col gap-2 w-1/2">
 								<label for="value" class="block text-sm font-medium text-gray-900 dark:text-white">
@@ -366,13 +365,10 @@ templ PricePage(summary models.Price) {
 						</div>
 						<div class="flex flex-col gap-2">
 							<label for="comment" class="block text-sm font-medium text-gray-900 dark:text-white">
-								Comment
+								Comment <p class="text-xs text-gray-500 inline">autosaved</p>
 							</label>
 							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{ summary.Comment }</textarea>
 						</div>
-						<button type="submit" class="w-full text-white text-center px-4 py-2 bg-blue-600 hover:bg-sky-100 hover:text-sky-900 border border-slate-600 rounded overflow-hidden shadow-md">
-							Save
-						</button>
 					</form>
 				</div>
 			</div>
