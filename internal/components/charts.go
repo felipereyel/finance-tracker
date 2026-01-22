@@ -1,6 +1,7 @@
 package components
 
 import (
+	"encoding/json"
 	"fintracker/internal/models"
 	"io"
 	"time"
@@ -49,7 +50,20 @@ func PriceChart(prices []models.Price, w io.Writer) error {
 			maxDate = t
 		}
 
-		items = append(items, opts.LineData{Value: []interface{}{t, price.Value, price.Id}})
+		data := struct {
+			Id      string `json:"name"`
+			Comment string `json:"comment"`
+		}{
+			Id:      price.Id,
+			Comment: price.Comment,
+		}
+
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			continue
+		}
+
+		items = append(items, opts.LineData{Value: []interface{}{t, price.Value, string(jsonData)}})
 	}
 
 	line := charts.NewLine()
@@ -80,9 +94,15 @@ func PriceChart(prices []models.Price, w io.Writer) error {
 
 var ToolTipFormatter = `
 function (info) {
-	var id = info[0].value[2];
+	var jsonData = info[0].value[2];
+	var data = JSON.parse(jsonData);
+	var id = data.id;
+	var comment = data.comment;
 	var value = info[0].value[1].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-	return '<a href="/prices/' + id + '">' + value + '</a>';
+	var tooltip = '<a href="/prices/' + id + '">' + value + '</a>';
+	tooltip += comment ? ('<br/>' + comment) : '';
+
+	return tooltip;
 }
 `
