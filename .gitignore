@@ -65,7 +65,7 @@ db.sqlite
 tmp
 
 # templ
-internal/components/*.go
+internal/components/design_templ.go
 
 # js
 *.js

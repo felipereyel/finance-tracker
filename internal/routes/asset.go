@@ -126,6 +126,25 @@ func assetDetails(e *core.RequestEvent) error {
 	return sendPage(e, components.AssetDetailsPage(asset, prices))
 }
 
+func assetPriceTable(e *core.RequestEvent) error {
+	db := database.NewDatabaseRepo(e.App)
+	assetId := e.Request.PathValue("asset_id")
+
+	asset, err := db.GetAssetAggregateById(assetId)
+	if err != nil {
+		fmt.Println("Error retrieving asset:", err)
+		return err
+	}
+
+	prices, err := db.ListPricesByAssetId(assetId)
+	if err != nil {
+		fmt.Println("Error retrieving prices:", err)
+		return err
+	}
+
+	return sendPage(e, components.AssetPricesPage(asset, prices))
+}
+
 func assetUpdate(e *core.RequestEvent) error {
 	db := database.NewDatabaseRepo(e.App)
 	assetId := e.Request.PathValue("asset_id")
@@ -149,4 +168,16 @@ func assetUpdate(e *core.RequestEvent) error {
 	}
 
 	return e.JSON(200, map[string]any{"success": true})
+}
+
+func assetChart(e *core.RequestEvent) error {
+	db := database.NewDatabaseRepo(e.App)
+	assetId := e.Request.PathValue("asset_id")
+
+	prices, err := db.ListPricesByAssetId(assetId)
+	if err != nil {
+		return err
+	}
+
+	return components.PriceChart(prices, e.Response)
 }
