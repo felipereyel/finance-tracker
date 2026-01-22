@@ -61,6 +61,9 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 
 	walletPie := charts.NewPie()
 	walletPie.SetGlobalOptions(
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
+		}),
 		charts.WithInitializationOpts(opts.Initialization{
 			Theme:           types.ThemeWonderland,
 			BackgroundColor: "#0F172A",
@@ -73,13 +76,16 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 
 	walletPie.AddSeries("area", walletItems,
 		charts.WithLabelOpts(opts.Label{
-			Show:      true,
+			Show:      opts.Bool(true),
 			Formatter: "{b}: R${c}",
 		}),
 	)
 
 	typePie := charts.NewPie()
 	typePie.SetGlobalOptions(
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
+		}),
 		charts.WithInitializationOpts(opts.Initialization{
 			Theme:           types.ThemeWonderland,
 			BackgroundColor: "#0F172A",
@@ -92,14 +98,12 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 
 	typePie.AddSeries("radius", typeItems,
 		charts.WithLabelOpts(opts.Label{
-			Show:      true,
+			Show:      opts.Bool(true),
 			Formatter: "{b}: R${c}",
 		}),
 	)
 
-	page := components.NewPage()
-	page.AddCharts(walletPie, typePie)
-	return page.Render(w)
+	return components.NewPage().AddCharts(walletPie, typePie).SetAssetsHost("/statics/assets/").Render(w)
 }
 
 func PriceChart(prices []models.Price, w io.Writer) error {
@@ -165,14 +169,17 @@ func PriceChart(prices []models.Price, w io.Writer) error {
 			Min:  minDate,
 		}),
 		charts.WithTooltipOpts(opts.Tooltip{ // Potential to string format tooltip here
-			Show:      true,
+			Show:      opts.Bool(true),
 			Trigger:   "axis",
 			Formatter: opts.FuncOpts(ToolTipFormatter),
+		}),
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
 		}),
 	)
 
 	line.AddSeries("Price", items)
-	return line.Render(w)
+	return components.NewPage().AddCharts(line).SetAssetsHost("/statics/assets/").Render(w)
 }
 
 var ToolTipFormatter = `
