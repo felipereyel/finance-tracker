@@ -5,10 +5,11 @@ import (
 )
 
 func SetupRoutes(se *core.ServeEvent) error {
-	// / -> redirect to /assets
 	se.Router.GET("/", homeRedirect)
 
-	// /assets?wallet=XXX -> asset list (home)
+	se.Router.GET("/summary", accountSummary)
+	se.Router.GET("/charts-content", accountChart)
+
 	se.Router.GET("/assets", assetList)
 	se.Router.GET("/assets-redirect", assetRedirect)
 
@@ -30,8 +31,6 @@ func SetupRoutes(se *core.ServeEvent) error {
 	se.Router.GET("/statics/{path...}", assetsHandler)
 	se.Router.GET("/discard", discardHandler)
 	se.Router.GET("/healthz", healthzHandler)
-
-	// app.Use(notFoundHandler)
 
 	return se.Next()
 }

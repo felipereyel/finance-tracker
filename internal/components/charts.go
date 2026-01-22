@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/v2/components"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/go-echarts/go-echarts/v2/types"
 )
@@ -17,6 +18,88 @@ func floorByMagnitude(value float32, magnitude float32) float32 {
 
 func ceilByMagnitude(value float32, magnitude float32) float32 {
 	return float32(int(value/magnitude)+1) * magnitude
+}
+
+func SummaryChart(summary models.Summary, w io.Writer) error {
+	walletMap := make(map[string]float32)
+	for _, wallet := range summary.Wallets {
+		walletMap[wallet[1]] = 0.0
+	}
+
+	typeMap := make(map[string]float32)
+	for _, assetType := range summary.AssetTypes {
+		typeMap[assetType[0]] = 0.0
+	}
+
+	for _, asset := range summary.Aggregates {
+		if _, ok := walletMap[asset.WalletName]; ok {
+			walletMap[asset.WalletName] += asset.LastPrice
+		}
+
+		if _, ok := typeMap[asset.Type]; ok {
+			typeMap[asset.Type] += asset.LastPrice
+		}
+	}
+
+	typeItems := make([]opts.PieData, 0)
+	for assetType, value := range typeMap {
+		if value == 0.0 {
+			continue
+		}
+
+		typeItems = append(typeItems, opts.PieData{Name: models.GetLabelForType(assetType), Value: value})
+	}
+
+	walletItems := make([]opts.PieData, 0)
+	for wallet, value := range walletMap {
+		if value == 0.0 {
+			continue
+		}
+
+		walletItems = append(walletItems, opts.PieData{Name: wallet, Value: value})
+	}
+
+	walletPie := charts.NewPie()
+	walletPie.SetGlobalOptions(
+		charts.WithInitializationOpts(opts.Initialization{
+			Theme:           types.ThemeWonderland,
+			BackgroundColor: "#0F172A",
+			Height:          "200px",
+		}),
+		charts.WithTitleOpts(opts.Title{
+			Title: "Wallet Summary",
+		}),
+	)
+
+	walletPie.AddSeries("area", walletItems,
+		charts.WithLabelOpts(opts.Label{
+			Show:      true,
+			Formatter: "{b}: R${c}",
+		}),
+	)
+
+	typePie := charts.NewPie()
+	typePie.SetGlobalOptions(
+		charts.WithInitializationOpts(opts.Initialization{
+			Theme:           types.ThemeWonderland,
+			BackgroundColor: "#0F172A",
+			Height:          "200px",
+		}),
+		charts.WithTitleOpts(opts.Title{
+			Title: "Asset Type Summary",
+		}),
+	)
+
+	typePie.AddSeries("radius", typeItems,
+		charts.WithLabelOpts(opts.Label{
+			Show:      true,
+			Formatter: "{b}: R${c}",
+		}),
+	)
+
+	page := components.NewPage()
+	page.AddCharts(walletPie, typePie)
+	return page.Render(w)
 }
 
 func PriceChart(prices []models.Price, w io.Writer) error {
