@@ -53,8 +53,10 @@ templ AssetSummaryPage(summary models.Summary) {
 		<div class="px-4 sm:px-8 m-auto pt-2">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between items-center">
-					<div class="flex flex-row items-center gap-4">
-						<a href="/" class="text-4xl">Assets</a>
+					<div class="flex flex-row items-center gap-4 text-2xl">
+						<a href="/">
+							<img src="/statics/assets/coin.svg" class="w-10 h-10"/>
+						</a>
 					</div>
 					<div class="flex flex-row justify-between items-center gap-4">
 						<a href="/summary" class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -127,10 +129,12 @@ templ AccountChartsPage(summary models.Summary) {
 		<div class="px-4 sm:px-8 m-auto pt-2">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between items-center">
-					<div class="flex flex-row items-center gap-4">
-						<a href="/" class="text-4xl">Assets</a>
+					<div class="flex flex-row items-center gap-4 text-2xl">
+						<a href="/">
+							<img src="/statics/assets/coin.svg" class="w-10 h-10"/>
+						</a>
 						<p>></p>
-						<a href={ templ.URL("/charts") } class="text-xl">Summary</a>
+						<a href={ templ.URL("/charts") }>Summary</a>
 					</div>
 				</div>
 				<div class="relative overflow-x-auto sm:rounded-lg mt-4 w-full">
@@ -210,10 +214,12 @@ templ AssetDetailsPage(summary models.AssetAggregate, prices []models.Price) {
 		<div class="px-4 sm:px-8 m-auto pt-2">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between items-center">
-					<div class="flex flex-row items-center gap-4">
-						<a href="/" class="text-4xl">Assets</a>
+					<div class="flex flex-row items-center gap-4 text-2xl">
+						<a href="/">
+							<img src="/statics/assets/coin.svg" class="w-10 h-10"/>
+						</a>
 						<p>></p>
-						<a href={ templ.URL("/assets/" + summary.Id) } class="text-xl">{ summary.Name }</a>
+						<a href={ templ.URL("/assets/" + summary.Id) }>{ summary.Name }</a>
 					</div>
 					<div class="flex flex-row justify-between items-center gap-4">
 						if summary.SellDate == "" {
@@ -291,12 +297,14 @@ templ AssetPricesPage(summary models.AssetAggregate, prices []models.Price) {
 		<div class="px-4 sm:px-8 m-auto pt-2">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between items-center">
-					<div class="flex flex-row items-center gap-4">
-						<a href="/" class="text-4xl">Assets</a>
+					<div class="flex flex-row items-center gap-4 text-2xl">
+						<a href="/">
+							<img src="/statics/assets/coin.svg" class="w-10 h-10"/>
+						</a>
 						<p>></p>
-						<a href={ templ.URL("/assets/" + summary.Id) } class="text-xl">{ summary.Name }</a>
+						<a href={ templ.URL("/assets/" + summary.Id) }>{ summary.Name }</a>
 						<p>></p>
-						<a href={ templ.URL("/assets/" + summary.Id + "/prices") } class="text-xl">Prices</a>
+						<a href={ templ.URL("/assets/" + summary.Id + "/prices") }>Prices</a>
 					</div>
 					<div class="flex flex-row justify-between items-center gap-4">
 						if summary.SellDate == "" {
@@ -389,12 +397,14 @@ templ PricePage(summary models.Price) {
 		<div class="px-4 sm:px-8 m-auto pt-2">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between items-center">
-					<div class="flex flex-row items-center gap-4">
-						<a href="/" class="text-4xl">Assets</a>
+					<div class="flex flex-row items-center gap-4 text-2xl">
+						<a href="/">
+							<img src="/statics/assets/coin.svg" class="w-10 h-10"/>
+						</a>
 						<p>></p>
-						<a href={ templ.URL("/assets/" + summary.AssetId) } class="text-xl">Asset</a>
+						<a href={ templ.URL("/assets/" + summary.AssetId) }>Asset</a>
 						<p>></p>
-						<a href={ templ.URL("/prices/" + summary.Id) } class="text-xl">
+						<a href={ templ.URL("/prices/" + summary.Id) }>
 						 	Price Details
 						</a>
 					</div>
