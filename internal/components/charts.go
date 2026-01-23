@@ -3,6 +3,7 @@ package components
 import (
 	"encoding/json"
 	"fintracker/internal/models"
+	"fmt"
 	"io"
 	"time"
 
@@ -106,6 +107,9 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 	return components.NewPage().AddCharts(walletPie, typePie).SetAssetsHost("/statics/assets/").Render(w)
 }
 
+var DATE_LAYOUT = "2006-01-02"
+var DATE_LAYOUT_LEN = len(DATE_LAYOUT)
+
 func PriceChart(prices []models.Price, w io.Writer) error {
 	items := make([]opts.LineData, 0)
 
@@ -116,8 +120,9 @@ func PriceChart(prices []models.Price, w io.Writer) error {
 	var minValue float32 = 0.0
 
 	for _, price := range prices {
-		t, err := time.Parse("2006-01-02 00:00:00.000Z", price.LoggedAt)
+		t, err := time.Parse(DATE_LAYOUT, price.LoggedAt[:DATE_LAYOUT_LEN])
 		if err != nil {
+			fmt.Println("Error parsing date:", err)
 			continue
 		}
 
@@ -147,6 +152,7 @@ func PriceChart(prices []models.Price, w io.Writer) error {
 
 		jsonData, err := json.Marshal(data)
 		if err != nil {
+			fmt.Println("Error marshaling json:", err)
 			continue
 		}
 

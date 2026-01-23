@@ -193,7 +193,7 @@ templ NewAsset(summary models.NewAssetSummary) {
 							<label for="buy_date" class="block text-sm font-medium text-gray-900 dark:text-white">
 								Buy Date
 							</label>
-							<input name="buy_date" id="buy_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required/>
+							<input value={models.GenerateDate()} name="buy_date" id="buy_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required/>
 							<label for="comment" class="block text-sm font-medium text-gray-900 dark:text-white">
 								Comment
 							</label>
@@ -372,7 +372,7 @@ templ NewPrice(summary models.AssetAggregate) {
 							<label for="value" class="block text-sm font-medium text-gray-900 dark:text-white">
 								Price
 							</label>
-							<input name="value" id="value" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required/>
+							<input value={summary.LastPrice} name="value" id="value" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required/>
 							<label for="logged_at" class="block text-sm font-medium text-gray-900 dark:text-white">
 								Log Date
 							</label>
