@@ -1,6 +1,6 @@
 # Finance Tracker
 
-go (pocket base) as backend and vue as frontend
+go (pocket base) as engine with templ and htmx for frontend
 
 ## Build and Run
 
@@ -19,18 +19,28 @@ docker run -p 8080:8080 -v ./pb_data:/pb_data fintracker
 
 ## Run locally (dev mode)
 
-### Go Backend
+### Docker compose
 
-```bash
-go run main.go
-# or
-air
+```sh
+docker compose up
 ```
 
-### Vue Frontend
+### Go CLI
+
+Go 1.25 and up required
 
 ```bash
-VITE_POCKETBASE_URL=http://localhost:8090 npm run dev
+# Install
+go mod download
+
+# Make templ and statics
+make
+
+# Run direct
+go run main.go serve --http=0.0.0.0:8090
+
+# or run with air for hot reload
+go tool air serve --http=0.0.0.0:8090
 ```
 
 ## TODO:
@@ -43,15 +53,11 @@ VITE_POCKETBASE_URL=http://localhost:8090 npm run dev
 - [x] wallets
 - [ ] Users
 - [ ] User add wallet
-- [ ] Add template data
-- [ ] Fix Date Inputs
+- [ ] Fix Date Inputs (defaults)
 
 ### Later
 
-- [ ] add other asset type not already on wallet
-- [ ] Back
 - [ ] Add tests
 - [ ] Add modeling for extra purchases for same asset
 - [ ] currency
 - [ ] % gain
-- [ ] extrapolation 
