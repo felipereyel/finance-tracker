@@ -7,4 +7,4 @@ statics:
 	curl https://go-echarts.github.io/go-echarts-assets/assets/themes/wonderland.js --output internal/embeded/assets/wonderland.js
 
 templ:
-	templ generate
+	go tool templ generate
