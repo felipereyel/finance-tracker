@@ -104,7 +104,7 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		}),
 	)
 
-	return components.NewPage().AddCharts(walletPie, typePie).SetAssetsHost("/statics/assets/").Render(w)
+	return components.NewPage().AddCharts(walletPie, typePie).SetAssetsHost("/_statics/assets/").Render(w)
 }
 
 var DATE_LAYOUT = "2006-01-02"
@@ -185,7 +185,7 @@ func PriceChart(prices []models.Price, w io.Writer) error {
 	)
 
 	line.AddSeries("Price", items)
-	return components.NewPage().AddCharts(line).SetAssetsHost("/statics/assets/").Render(w)
+	return components.NewPage().AddCharts(line).SetAssetsHost("/_statics/assets/").Render(w)
 }
 
 var ToolTipFormatter = `

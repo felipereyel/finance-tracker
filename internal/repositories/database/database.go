@@ -18,7 +18,7 @@ func NewDatabaseRepo(app core.App) database {
 
 // Wallet methods
 
-func (db *database) ListWallets() ([]models.Wallet, error) {
+func (db database) ListWallets() ([]models.Wallet, error) {
 	var wallets []models.Wallet
 	if err := db.app.DB().Select("id", "name").From("wallets").All(&wallets); err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (db *database) ListWallets() ([]models.Wallet, error) {
 
 // Asset methods
 
-func (db *database) CreateAsset(asset models.Asset) error {
+func (db database) CreateAsset(asset models.Asset) error {
 	result, err := db.app.DB().Insert("assets", dbx.Params{
 		"id":            asset.Id,
 		"name":          asset.Name,
@@ -58,7 +58,7 @@ func (db *database) CreateAsset(asset models.Asset) error {
 	return nil
 }
 
-func (db *database) UpdateAsset(asset models.Asset) error {
+func (db database) UpdateAsset(asset models.Asset) error {
 	result, err := db.app.DB().Update("assets", dbx.Params{
 		"comment":   asset.Comment,
 		"sell_date": asset.SellDate,
@@ -81,7 +81,7 @@ func (db *database) UpdateAsset(asset models.Asset) error {
 	return nil
 }
 
-func (db *database) GetAssetById(assetId string) (models.Asset, error) {
+func (db database) GetAssetById(assetId string) (models.Asset, error) {
 	var asset models.Asset
 	if err := db.app.DB().Select("id", "name", "type", "wallet", "initial_price", "buy_date", "sell_date", "comment", "created", "updated").From("assets").Where(dbx.HashExp{"id": assetId}).One(&asset); err != nil {
 		return models.Asset{}, err
@@ -115,7 +115,7 @@ var AssetAggregatesSelectFragment = `
 		ap.logged_at = (SELECT MAX(logged_at) FROM asset_prices WHERE asset_id = a.id)
 `
 
-func (db *database) ListAssetAggregates(wallet string, asset_type string) ([]models.AssetAggregate, error) {
+func (db database) ListAssetAggregates(wallet string, asset_type string) ([]models.AssetAggregate, error) {
 	var ListAssetAggregatesQuery = AssetAggregatesSelectFragment + ` AND a.sell_date = '' ORDER BY w.name, ap.logged_at DESC`
 
 	var assets []models.AssetAggregate
@@ -139,7 +139,7 @@ func (db *database) ListAssetAggregates(wallet string, asset_type string) ([]mod
 	return filtered, nil
 }
 
-func (db *database) GetAssetAggregateById(assetId string) (models.AssetAggregate, error) {
+func (db database) GetAssetAggregateById(assetId string) (models.AssetAggregate, error) {
 	var GetAssetAggregateByIdQuery = AssetAggregatesSelectFragment + ` AND a.id = {:id} LIMIT 1`
 	var asset models.AssetAggregate
 	if err := db.app.DB().NewQuery(GetAssetAggregateByIdQuery).Bind(dbx.Params{"id": assetId}).One(&asset); err != nil {
@@ -151,7 +151,7 @@ func (db *database) GetAssetAggregateById(assetId string) (models.AssetAggregate
 
 // Price methods
 
-func (db *database) CreatePrice(price models.Price) error {
+func (db database) CreatePrice(price models.Price) error {
 	result, err := db.app.DB().Insert("asset_prices", dbx.Params{
 		"id":        price.Id,
 		"asset_id":  price.AssetId,
@@ -179,7 +179,7 @@ func (db *database) CreatePrice(price models.Price) error {
 	return nil
 }
 
-func (db *database) UpdatePrice(price models.Price) error {
+func (db database) UpdatePrice(price models.Price) error {
 	result, err := db.app.DB().Update("asset_prices", dbx.Params{
 		"comment": price.Comment,
 		"updated": price.Updated,
@@ -200,7 +200,7 @@ func (db *database) UpdatePrice(price models.Price) error {
 	return nil
 }
 
-func (db *database) GetPriceById(priceId string) (models.Price, error) {
+func (db database) GetPriceById(priceId string) (models.Price, error) {
 	var price models.Price
 	if err := db.app.DB().Select("id", "asset_id", "value", "logged_at", "gain", "comment", "created", "updated").From("asset_prices").Where(dbx.HashExp{"id": priceId}).One(&price); err != nil {
 		return models.Price{}, err
@@ -209,7 +209,7 @@ func (db *database) GetPriceById(priceId string) (models.Price, error) {
 	return price, nil
 }
 
-func (db *database) ListPricesByAssetId(assetId string) ([]models.Price, error) {
+func (db database) ListPricesByAssetId(assetId string) ([]models.Price, error) {
 	var prices []models.Price
 	if err := db.app.DB().Select("id", "asset_id", "value", "logged_at", "gain", "comment", "created", "updated").From("asset_prices").Where(dbx.HashExp{"asset_id": assetId}).OrderBy("logged_at DESC").All(&prices); err != nil {
 		return nil, err
