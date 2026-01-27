@@ -2,7 +2,6 @@ package routes
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -10,7 +9,7 @@ import (
 func basicAuthMiddleware(e *core.RequestEvent) error {
 	basicUnathorized := func() error {
 		e.Response.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
-		return e.Error(http.StatusUnauthorized, "Unauthorized", "")
+		return e.UnauthorizedError("Unauthorized", "")
 	}
 
 	username, pwd, ok := e.Request.BasicAuth()
