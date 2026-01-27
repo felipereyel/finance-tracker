@@ -4,6 +4,7 @@ import (
 	"fintracker/internal/components"
 	"fintracker/internal/controllers"
 	"fintracker/internal/models"
+	"fintracker/internal/urls"
 	"fmt"
 
 	"github.com/pocketbase/pocketbase/core"
@@ -14,19 +15,20 @@ func setupScopedAssetsRoutes(group *router.RouterGroup[*core.RequestEvent], c co
 	// TODO: add scope check for asset_id
 	// group.BindFunc(basicAuthMiddleware)
 
-	group.GET("/", withControllerClousure(c, assetDetails))
-	group.POST("/", withControllerClousure(c, assetUpdate))
+	group.GET(urls.Root, withControllerClousure(c, assetDetails))
+	group.POST(urls.Root, withControllerClousure(c, assetUpdate))
 
-	group.GET("/prices", withControllerClousure(c, assetPriceTable))
-	group.POST("/prices", withControllerClousure(c, assetPriceCreate))
-	group.GET("/prices-chart", withControllerClousure(c, assetPriceChart))
-	group.GET("/prices-popup", withControllerClousure(c, assetPricePopup))
+	group.GET(urls.AssetIdPricesPath, withControllerClousure(c, assetPriceTable))
+	group.POST(urls.AssetIdPricesPath, withControllerClousure(c, assetPriceCreate))
+	group.GET(urls.AssetIdPricesChartPath, withControllerClousure(c, assetPriceChart))
+	group.GET(urls.AssetIdPricesPopupPath, withControllerClousure(c, assetPricePopup))
 }
 
 func assetRedirect(e *core.RequestEvent) error {
+	// TODO: add query to urls file
 	wallet := e.Request.URL.Query().Get("wallet")
 	asset_type := e.Request.URL.Query().Get("type")
-	e.Response.Header().Set("HX-Redirect", "/u/assets?wallet="+wallet+"&type="+asset_type)
+	e.Response.Header().Set("HX-Redirect", urls.AssetsURLWithQuey(wallet, asset_type))
 	return e.JSON(200, map[string]any{"success": true})
 }
 
@@ -61,7 +63,7 @@ func accountSummary(c controllers.Controllers, e *core.RequestEvent) error {
 		return err
 	}
 
-	return sendPage(e, components.AccountChartsPage(summary))
+	return sendPage(e, components.SummaryPage(summary))
 }
 
 func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
@@ -88,12 +90,12 @@ func assetCreate(c controllers.Controllers, e *core.RequestEvent) error {
 		return err
 	}
 
-	e.Response.Header().Set("HX-Redirect", "/u/assets/"+assetId)
+	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(assetId))
 	return e.JSON(200, map[string]any{"success": true})
 }
 
 func assetDetails(c controllers.Controllers, e *core.RequestEvent) error {
-	assetId := e.Request.PathValue("asset_id")
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
 	asset, err := c.Asset.GetAssetAggregate(assetId)
 	if err != nil {
@@ -105,7 +107,7 @@ func assetDetails(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func assetPriceTable(c controllers.Controllers, e *core.RequestEvent) error {
-	assetId := e.Request.PathValue("asset_id")
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
 	assetAgg, prices, err := c.Price.ListPricesEnrich(assetId)
 	if err != nil {
@@ -117,7 +119,7 @@ func assetPriceTable(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func assetUpdate(c controllers.Controllers, e *core.RequestEvent) error {
-	assetId := e.Request.PathValue("asset_id")
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
 	assetDTO := models.AssetUpdateDTO{}
 	if err := e.BindBody(&assetDTO); err != nil {
@@ -132,7 +134,7 @@ func assetUpdate(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func assetPriceChart(c controllers.Controllers, e *core.RequestEvent) error {
-	assetId := e.Request.PathValue("asset_id")
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
 	prices, err := c.Price.ListPrices(assetId)
 	if err != nil {
@@ -143,7 +145,7 @@ func assetPriceChart(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func assetPricePopup(c controllers.Controllers, e *core.RequestEvent) error {
-	assetId := e.Request.PathValue("asset_id")
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
 	asset, err := c.Asset.GetAssetAggregate(assetId)
 	if err != nil {
@@ -155,7 +157,7 @@ func assetPricePopup(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
-	assetId := e.Request.PathValue("asset_id")
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
 	priceDTO := models.PriceCreateDTO{AssetId: assetId}
 	if err := e.BindBody(&priceDTO); err != nil {
@@ -166,6 +168,6 @@ func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
 		return err
 	}
 
-	e.Response.Header().Set("HX-Redirect", "/u/assets/"+priceDTO.AssetId)
+	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(priceDTO.AssetId))
 	return e.JSON(200, map[string]any{"success": true})
 }

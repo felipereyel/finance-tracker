@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fintracker/internal/controllers"
+	"fintracker/internal/urls"
 
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/router"
@@ -9,12 +10,12 @@ import (
 
 func SetupRoutes(c controllers.Controllers) func(*core.ServeEvent) error {
 	return func(se *core.ServeEvent) error {
-		se.Router.GET("/_statics/{path...}", staticsHandler)
-		se.Router.GET("/_discard", discardHandler)
-		se.Router.GET("/_healthz", healthzHandler)
-		se.Router.GET("/", homeRedirect)
+		se.Router.GET(urls.StaticsURL("{path...}"), staticsHandler)
+		se.Router.GET(urls.DiscardURL, discardHandler)
+		se.Router.GET(urls.HealthzURL, healthzHandler)
+		se.Router.GET(urls.Root, homeRedirect)
 
-		authenticatedGroup := se.Router.Group("/u")
+		authenticatedGroup := se.Router.Group(urls.AuthenticatedUrl)
 		setupAuthenticatedRoutes(authenticatedGroup, c)
 
 		return se.Next()
@@ -24,19 +25,19 @@ func SetupRoutes(c controllers.Controllers) func(*core.ServeEvent) error {
 func setupAuthenticatedRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
 	group.BindFunc(basicAuthMiddleware)
 
-	group.GET("/summary", withControllerClousure(c, accountSummary))
-	group.GET("/summary-chart", withControllerClousure(c, accountChart))
+	group.GET(urls.AssetsRedirectPath, assetRedirect)
 
-	group.GET("/assets-redirect", assetRedirect)
+	group.GET(urls.SummaryPath, withControllerClousure(c, accountSummary))
+	group.GET(urls.SummaryChartPath, withControllerClousure(c, accountChart))
 
-	group.GET("/assets", withControllerClousure(c, assetList))
-	group.POST("/assets", withControllerClousure(c, assetCreate))
-	group.GET("/assets-popup", withControllerClousure(c, assetCreatePopup))
+	group.GET(urls.AssetsPath, withControllerClousure(c, assetList))
+	group.POST(urls.AssetsPath, withControllerClousure(c, assetCreate))
+	group.GET(urls.AssetsPopupPath, withControllerClousure(c, assetCreatePopup))
 
-	scopedAssetsGroup := group.Group("/assets/{asset_id}")
+	scopedAssetsGroup := group.Group(urls.AssetIdGroupPath)
 	setupScopedAssetsRoutes(scopedAssetsGroup, c)
 
-	scopedPricesGroup := group.Group("/prices/{price_id}")
+	scopedPricesGroup := group.Group(urls.PriceIdGroupPath)
 	setupScopedPricesRoutes(scopedPricesGroup, c)
 }
 
@@ -46,14 +47,14 @@ func withControllerClousure(c controllers.Controllers, handler func(controllers.
 	}
 }
 
+func homeRedirect(e *core.RequestEvent) error {
+	return e.Redirect(302, urls.AssetsURL)
+}
+
 func discardHandler(e *core.RequestEvent) error {
 	return e.JSON(200, map[string]any{"success": true})
 }
 
 func healthzHandler(e *core.RequestEvent) error {
 	return e.JSON(200, map[string]any{"success": true})
-}
-
-func homeRedirect(e *core.RequestEvent) error {
-	return e.Redirect(302, "/u/assets")
 }

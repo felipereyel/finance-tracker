@@ -4,6 +4,7 @@ import (
 	"fintracker/internal/components"
 	"fintracker/internal/controllers"
 	"fintracker/internal/models"
+	"fintracker/internal/urls"
 	"fmt"
 
 	"github.com/pocketbase/pocketbase/core"
@@ -14,12 +15,12 @@ func setupScopedPricesRoutes(group *router.RouterGroup[*core.RequestEvent], c co
 	// TODO: add scope check for price_id
 	// group.BindFunc(basicAuthMiddleware)
 
-	group.GET("/", withControllerClousure(c, priceDetails))
-	group.POST("/", withControllerClousure(c, priceUpdate))
+	group.GET(urls.Root, withControllerClousure(c, priceDetails))
+	group.POST(urls.Root, withControllerClousure(c, priceUpdate))
 }
 
 func priceDetails(c controllers.Controllers, e *core.RequestEvent) error {
-	priceId := e.Request.PathValue("price_id")
+	priceId := e.Request.PathValue(urls.PriceIdPathParam)
 
 	price, err := c.Price.GetPrice(priceId)
 	if err != nil {
@@ -31,7 +32,7 @@ func priceDetails(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func priceUpdate(c controllers.Controllers, e *core.RequestEvent) error {
-	priceId := e.Request.PathValue("price_id")
+	priceId := e.Request.PathValue(urls.PriceIdPathParam)
 
 	priceDTO := models.PriceUpdateDTO{}
 	if err := e.BindBody(&priceDTO); err != nil {
