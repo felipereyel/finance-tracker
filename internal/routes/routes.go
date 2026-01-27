@@ -23,7 +23,7 @@ func SetupRoutes(c controllers.Controllers) func(*core.ServeEvent) error {
 }
 
 func setupAuthenticatedRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
-	group.BindFunc(basicAuthMiddleware)
+	group.BindFunc(withControllerClousure(c, basicAuthMiddleware))
 
 	group.GET(urls.AssetsRedirectPath, assetRedirect)
 

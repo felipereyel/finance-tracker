@@ -12,8 +12,7 @@ import (
 )
 
 func setupScopedPricesRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
-	// TODO: add scope check for price_id
-	// group.BindFunc(basicAuthMiddleware)
+	group.BindFunc(withControllerClousure(c, priceScopeCheckMiddleware))
 
 	group.GET(urls.Root, withControllerClousure(c, priceDetails))
 	group.POST(urls.Root, withControllerClousure(c, priceUpdate))

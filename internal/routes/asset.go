@@ -12,8 +12,7 @@ import (
 )
 
 func setupScopedAssetsRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
-	// TODO: add scope check for asset_id
-	// group.BindFunc(basicAuthMiddleware)
+	group.BindFunc(withControllerClousure(c, assetScopeCheckMiddleware))
 
 	group.GET(urls.Root, withControllerClousure(c, assetDetails))
 	group.POST(urls.Root, withControllerClousure(c, assetUpdate))

@@ -16,6 +16,75 @@ func NewDatabaseRepo(app core.App) database {
 	return database{app}
 }
 
+// User methods
+
+func (db database) GetUserIdFromCredentials(email string, password string) (string, error) {
+	user, err := db.app.FindAuthRecordByEmail("users", email)
+	if err != nil {
+		fmt.Println("auth record not found", err)
+		return "", err
+	}
+
+	if !user.ValidatePassword(password) {
+		fmt.Println("pwd not matched")
+		return "", fmt.Errorf("invalid password")
+	}
+
+	return user.Id, nil
+}
+
+func (db database) ChechUserOwnsAsset(userId string, assetId string) error {
+	query := db.app.DB().Select("wallets.user_id as user", "assets.id as asset").
+		From("wallets").
+		InnerJoin("assets", dbx.NewExp("wallets.id = assets.wallet")).
+		Where(dbx.And(
+			dbx.NewExp("wallets.user_id = {:userId}", dbx.Params{"userId": userId}),
+			dbx.NewExp("assets.id = {:assetId}", dbx.Params{"assetId": assetId}),
+		)).
+		Build()
+
+	data := struct {
+		User  string
+		Asset string
+	}{}
+
+	if err := query.One(&data); err != nil {
+		return err
+	}
+
+	if data.Asset != assetId || data.User != userId {
+		return fmt.Errorf("no rows affected when checking records")
+	}
+
+	return nil
+}
+
+func (db database) ChechUserOwnsPrice(userId string, priceId string) error {
+	query := db.app.DB().Select("wallets.user_id as user", "asset_prices.id as price").
+		From("wallets").
+		InnerJoin("assets", dbx.NewExp("wallets.id = assets.wallet")).
+		InnerJoin("asset_prices", dbx.NewExp("assets.id = asset_prices.asset_id")).
+		Where(dbx.And(
+			dbx.NewExp("wallets.user_id = {:userId}", dbx.Params{"userId": userId}),
+			dbx.NewExp("asset_prices.id = {:priceId}", dbx.Params{"priceId": priceId}),
+		))
+
+	data := struct {
+		User  string
+		Price string
+	}{}
+
+	if err := query.Build().One(&data); err != nil {
+		return err
+	}
+
+	if data.Price != priceId || data.User != userId {
+		return fmt.Errorf("no rows affected when checking records")
+	}
+
+	return nil
+}
+
 // Wallet methods
 
 func (db database) ListWallets() ([]models.Wallet, error) {
@@ -93,7 +162,7 @@ func (db database) GetAssetById(assetId string) (models.Asset, error) {
 // AssetAggregate methods
 
 var AssetAggregatesSelectFragment = `
-	SELECT 
+	SELECT
 		a.id,
 		a.name,
 		a.type,
@@ -105,12 +174,12 @@ var AssetAggregatesSelectFragment = `
 		ap.logged_at as last_date,
 		a.sell_date as sell_date,
 		a.comment as comment
-	FROM 
+	FROM
 		assets a,
 		asset_prices ap,
 		wallets w
-	WHERE 
-		a.id = ap.asset_id AND 
+	WHERE
+		a.id = ap.asset_id AND
 		a.wallet = w.id AND
 		ap.logged_at = (SELECT MAX(logged_at) FROM asset_prices WHERE asset_id = a.id)
 `

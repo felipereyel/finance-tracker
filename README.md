@@ -53,7 +53,7 @@ go tool air serve --http=0.0.0.0:8090
 - [x] wallets
 - [x] Users
 - [x] Fix Date Inputs (defaults)
-- [ ] add auth scope to routes
+- [x] add auth scope to routes
 - [ ] add more charts to account summary
 - [ ] add error fallback
 
