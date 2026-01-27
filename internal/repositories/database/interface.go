@@ -3,6 +3,11 @@ package database
 import "fintracker/internal/models"
 
 type Database interface {
+	// User methods
+	GetUserIdFromCredentials(email string, password string) (string, error)
+	ChechUserOwnsAsset(userId string, assetId string) error
+	ChechUserOwnsPrice(userId string, assetId string) error
+
 	// Wallet methods
 	ListWallets() ([]models.Wallet, error)
 

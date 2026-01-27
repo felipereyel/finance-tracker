@@ -2,254 +2,171 @@ package routes
 
 import (
 	"fintracker/internal/components"
+	"fintracker/internal/controllers"
 	"fintracker/internal/models"
-	"fintracker/internal/repositories/database"
+	"fintracker/internal/urls"
 	"fmt"
 
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/router"
 )
 
-func assetList(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
+func setupScopedAssetsRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
+	group.BindFunc(withControllerClousure(c, assetScopeCheckMiddleware))
+
+	group.GET(urls.Root, withControllerClousure(c, assetDetails))
+	group.POST(urls.Root, withControllerClousure(c, assetUpdate))
+
+	group.GET(urls.AssetIdPricesPath, withControllerClousure(c, assetPriceTable))
+	group.POST(urls.AssetIdPricesPath, withControllerClousure(c, assetPriceCreate))
+	group.GET(urls.AssetIdPricesChartPath, withControllerClousure(c, assetPriceChart))
+	group.GET(urls.AssetIdPricesPopupPath, withControllerClousure(c, assetPricePopup))
+}
+
+func assetRedirect(e *core.RequestEvent) error {
+	// TODO: add query to urls file
 	wallet := e.Request.URL.Query().Get("wallet")
 	asset_type := e.Request.URL.Query().Get("type")
+	e.Response.Header().Set("HX-Redirect", urls.AssetsURLWithQuey(wallet, asset_type))
+	return e.JSON(200, map[string]any{"success": true})
+}
 
-	aggregated, err := db.ListAssetAggregates(wallet, asset_type)
+func assetList(c controllers.Controllers, e *core.RequestEvent) error {
+	walletFilter := e.Request.URL.Query().Get("wallet")
+	typeFilter := e.Request.URL.Query().Get("type")
+
+	summary, err := c.Asset.SummarizeAssets(walletFilter, typeFilter)
 	if err != nil {
 		return err
-	}
-
-	wallets, err := db.ListWallets()
-	if err != nil {
-		return err
-	}
-
-	summary := models.Summary{
-		Total:      0,
-		Aggregates: make([]models.AssetAggregate, 0),
-
-		AssetTypes:   models.AssetTypes,
-		SelectedType: asset_type,
-
-		SelectedWallet: wallet,
-		Wallets:        make([][]string, 0),
-	}
-
-	for _, asset := range aggregated {
-		summary.Total += asset.LastPrice
-		summary.Aggregates = append(summary.Aggregates, asset)
-	}
-
-	for _, wallet := range wallets {
-		summary.Wallets = append(summary.Wallets, []string{wallet.Id, wallet.Name})
 	}
 
 	return sendPage(e, components.AssetSummaryPage(summary))
 }
 
-func accountChart(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
+func accountChart(c controllers.Controllers, e *core.RequestEvent) error {
+	// TODO: add filters to chart
 
-	aggregated, err := db.ListAssetAggregates("", "")
+	summary, err := c.Asset.SummarizeAssets("", "")
 	if err != nil {
 		return err
-	}
-
-	wallets, err := db.ListWallets()
-	if err != nil {
-		return err
-	}
-
-	summary := models.Summary{
-		Total:      0,
-		Aggregates: make([]models.AssetAggregate, 0),
-
-		AssetTypes:   models.AssetTypes,
-		SelectedType: "",
-
-		SelectedWallet: "",
-		Wallets:        make([][]string, 0),
-	}
-
-	for _, asset := range aggregated {
-		summary.Total += asset.LastPrice
-		summary.Aggregates = append(summary.Aggregates, asset)
-	}
-
-	for _, wallet := range wallets {
-		summary.Wallets = append(summary.Wallets, []string{wallet.Id, wallet.Name})
 	}
 
 	return components.SummaryChart(summary, e.Response)
 }
 
-func accountSummary(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
+func accountSummary(c controllers.Controllers, e *core.RequestEvent) error {
+	// TODO: add filters to chart
 
-	aggregated, err := db.ListAssetAggregates("", "")
+	summary, err := c.Asset.SummarizeAssets("", "")
 	if err != nil {
 		return err
 	}
 
-	wallets, err := db.ListWallets()
-	if err != nil {
-		return err
-	}
-
-	summary := models.Summary{
-		Total:      0,
-		Aggregates: make([]models.AssetAggregate, 0),
-
-		AssetTypes:   models.AssetTypes,
-		SelectedType: "",
-
-		SelectedWallet: "",
-		Wallets:        make([][]string, 0),
-	}
-
-	for _, asset := range aggregated {
-		summary.Total += asset.LastPrice
-		summary.Aggregates = append(summary.Aggregates, asset)
-	}
-
-	for _, wallet := range wallets {
-		summary.Wallets = append(summary.Wallets, []string{wallet.Id, wallet.Name})
-	}
-
-	return sendPage(e, components.AccountChartsPage(summary))
+	return sendPage(e, components.SummaryPage(summary))
 }
 
-func assetRedirect(e *core.RequestEvent) error {
-	wallet := e.Request.URL.Query().Get("wallet")
-	asset_type := e.Request.URL.Query().Get("type")
-	e.Response.Header().Set("HX-Redirect", "/assets?wallet="+wallet+"&type="+asset_type)
-	return e.JSON(200, map[string]any{"success": true})
-}
-
-func assetCreatePopup(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
-
+func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
 	// TODO: init popup with selected fiels based in query
 	// wallet := e.Request.URL.Query().Get("wallet")
 	// asset_type := e.Request.URL.Query().Get("type")
 
-	wallets, err := db.ListWallets()
+	options, err := c.Asset.GetAssetOptions()
 	if err != nil {
 		return err
 	}
 
-	summary := models.NewAssetSummary{
-		AssetTypes: models.AssetTypes,
-		Wallets:    make([][]string, 0),
-	}
-
-	for _, wallet := range wallets {
-		summary.Wallets = append(summary.Wallets, []string{wallet.Id, wallet.Name})
-	}
-
-	return sendPage(e, components.NewAsset(summary))
+	return sendPage(e, components.NewAsset(options))
 }
 
-func assetCreate(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
-
+func assetCreate(c controllers.Controllers, e *core.RequestEvent) error {
 	assetDTO := models.AssetCreateDTO{}
 	if err := e.BindBody(&assetDTO); err != nil {
 		return err
 	}
 
-	newAsset := models.CreateNewAsset(assetDTO)
-	if err := db.CreateAsset(newAsset); err != nil {
+	assetId, err := c.Asset.CreateAsset(assetDTO)
+	if err != nil {
 		return err
 	}
 
-	priceDTO := models.PriceCreateDTO{
-		AssetId:  newAsset.Id,
-		Value:    newAsset.InitialPrice,
-		LoggedAt: newAsset.BuyDate,
-		Comment:  "Initial price",
-	}
-
-	newPrice := models.CreateNewPrice(priceDTO)
-	if err := db.CreatePrice(newPrice); err != nil {
-		return err
-	}
-
-	e.Response.Header().Set("HX-Redirect", "/assets/"+newAsset.Id)
+	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(assetId))
 	return e.JSON(200, map[string]any{"success": true})
 }
 
-func assetDetails(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
-	assetId := e.Request.PathValue("asset_id")
+func assetDetails(c controllers.Controllers, e *core.RequestEvent) error {
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
-	asset, err := db.GetAssetAggregateById(assetId)
+	asset, err := c.Asset.GetAssetAggregate(assetId)
 	if err != nil {
 		fmt.Println("Error retrieving asset:", err)
 		return err
 	}
 
-	prices, err := db.ListPricesByAssetId(assetId)
-	if err != nil {
-		fmt.Println("Error retrieving prices:", err)
-		return err
-	}
-
-	return sendPage(e, components.AssetDetailsPage(asset, prices))
+	return sendPage(e, components.AssetDetailsPage(asset))
 }
 
-func assetPriceTable(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
-	assetId := e.Request.PathValue("asset_id")
+func assetPriceTable(c controllers.Controllers, e *core.RequestEvent) error {
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
-	asset, err := db.GetAssetAggregateById(assetId)
+	assetAgg, prices, err := c.Price.ListPricesEnrich(assetId)
 	if err != nil {
-		fmt.Println("Error retrieving asset:", err)
+		fmt.Println("Error retrieving info:", err)
 		return err
 	}
 
-	prices, err := db.ListPricesByAssetId(assetId)
-	if err != nil {
-		fmt.Println("Error retrieving prices:", err)
-		return err
-	}
-
-	return sendPage(e, components.AssetPricesPage(asset, prices))
+	return sendPage(e, components.AssetPricesPage(assetAgg, prices))
 }
 
-func assetUpdate(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
-	assetId := e.Request.PathValue("asset_id")
+func assetUpdate(c controllers.Controllers, e *core.RequestEvent) error {
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
 	assetDTO := models.AssetUpdateDTO{}
 	if err := e.BindBody(&assetDTO); err != nil {
 		return err
 	}
 
-	asset, err := db.GetAssetById(assetId)
-	if err != nil {
-		return err
-	}
-
-	asset.SellDate = assetDTO.SellDate
-	asset.Comment = assetDTO.Comment
-	asset.Updated = models.GenerateTimestamp()
-
-	if err := db.UpdateAsset(asset); err != nil {
+	if err := c.Asset.UpdateAsset(assetId, assetDTO); err != nil {
 		return err
 	}
 
 	return e.JSON(200, map[string]any{"success": true})
 }
 
-func assetChart(e *core.RequestEvent) error {
-	db := database.NewDatabaseRepo(e.App)
-	assetId := e.Request.PathValue("asset_id")
+func assetPriceChart(c controllers.Controllers, e *core.RequestEvent) error {
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
-	prices, err := db.ListPricesByAssetId(assetId)
+	prices, err := c.Price.ListPrices(assetId)
 	if err != nil {
 		return err
 	}
 
 	return components.PriceChart(prices, e.Response)
+}
+
+func assetPricePopup(c controllers.Controllers, e *core.RequestEvent) error {
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
+
+	asset, err := c.Asset.GetAssetAggregate(assetId)
+	if err != nil {
+		fmt.Println("Error retrieving asset:", err)
+		return err
+	}
+
+	return sendPage(e, components.NewPrice(asset))
+}
+
+func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
+	assetId := e.Request.PathValue(urls.AssetIdPathParam)
+
+	priceDTO := models.PriceCreateDTO{AssetId: assetId}
+	if err := e.BindBody(&priceDTO); err != nil {
+		return err
+	}
+
+	if err := c.Price.CreatePrice(assetId, priceDTO); err != nil {
+		return err
+	}
+
+	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(priceDTO.AssetId))
+	return e.JSON(200, map[string]any{"success": true})
 }

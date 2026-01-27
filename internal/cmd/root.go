@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fintracker/internal/config"
+	"fintracker/internal/controllers"
+	"fintracker/internal/repositories/database"
 	"fintracker/internal/routes"
 
 	"fintracker/internal/migrations"
@@ -12,9 +14,11 @@ import (
 
 func Root() {
 	app := pocketbase.New()
-	cfg := config.GetServerConfigs()
-	app.OnServe().BindFunc(routes.SetupRoutes)
+	db := database.NewDatabaseRepo(app)
+	c := controllers.NewControllers(db)
+	app.OnServe().BindFunc(routes.SetupRoutes(c))
 
+	cfg := config.GetServerConfigs()
 	if cfg.AutoMigrate {
 		migrations.Register()
 	}

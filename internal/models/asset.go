@@ -45,7 +45,7 @@ type Summary struct {
 	SelectedWallet string
 }
 
-type NewAssetSummary struct {
+type NewAssetOptions struct {
 	AssetTypes [][]string
 	Wallets    [][]string
 }
@@ -81,6 +81,12 @@ type AssetUpdateDTO struct {
 var AssetFields = []string{"id", "created", "updated", "name", "type", "wallet", "comment", "initial_price", "buy_date", "sell_date"}
 
 var EmptyAsset = Asset{}
+
+var EmptySummary = Summary{}
+
+var EmptyNewAssetOptions = NewAssetOptions{}
+
+var EmptyAssetAggregate = AssetAggregate{}
 
 func CreateNewAsset(dto AssetCreateDTO) Asset {
 	return Asset{
