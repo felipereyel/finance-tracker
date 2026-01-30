@@ -12,10 +12,11 @@ import (
 )
 
 func setupScopedPricesRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
-	group.BindFunc(withControllerClousure(c, priceScopeCheckMiddleware))
+	rc := NewRouteController(group, c)
+	rc.BindFunc(priceScopeCheckMiddleware)
 
-	group.GET(urls.Root, withControllerClousure(c, priceDetails))
-	group.POST(urls.Root, withControllerClousure(c, priceUpdate))
+	rc.GET(urls.Root, priceDetails)
+	rc.POST(urls.Root, priceUpdate)
 }
 
 func priceDetails(c controllers.Controllers, e *core.RequestEvent) error {

@@ -23,16 +23,17 @@ func SetupRoutes(c controllers.Controllers) func(*core.ServeEvent) error {
 }
 
 func setupAuthenticatedRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
-	group.BindFunc(withControllerClousure(c, basicAuthMiddleware))
+	rc := NewRouteController(group, c)
+	rc.BindFunc(basicAuthMiddleware)
 
-	group.GET(urls.AssetsRedirectPath, assetRedirect)
+	rc.GET(urls.AssetsRedirectPath, assetRedirect)
 
-	group.GET(urls.SummaryPath, withControllerClousure(c, accountSummary))
-	group.GET(urls.SummaryChartPath, withControllerClousure(c, accountChart))
+	rc.GET(urls.SummaryPath, accountSummary)
+	rc.GET(urls.SummaryChartPath, accountChart)
 
-	group.GET(urls.AssetsPath, withControllerClousure(c, assetList))
-	group.POST(urls.AssetsPath, withControllerClousure(c, assetCreate))
-	group.GET(urls.AssetsPopupPath, withControllerClousure(c, assetCreatePopup))
+	rc.GET(urls.AssetsPath, assetList)
+	rc.POST(urls.AssetsPath, assetCreate)
+	rc.GET(urls.AssetsPopupPath, assetCreatePopup)
 
 	scopedAssetsGroup := group.Group(urls.AssetIdGroupPath)
 	setupScopedAssetsRoutes(scopedAssetsGroup, c)
@@ -49,6 +50,27 @@ func withControllerClousure(c controllers.Controllers, handler func(controllers.
 
 func homeRedirect(e *core.RequestEvent) error {
 	return e.Redirect(302, urls.AssetsURL)
+}
+
+type RouteController struct {
+	router *router.RouterGroup[*core.RequestEvent]
+	c      controllers.Controllers
+}
+
+func NewRouteController(router *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) *RouteController {
+	return &RouteController{router: router, c: c}
+}
+
+func (rc *RouteController) GET(path string, handler func(controllers.Controllers, *core.RequestEvent) error) {
+	rc.router.GET(path, withControllerClousure(rc.c, handler))
+}
+
+func (rc *RouteController) POST(path string, handler func(controllers.Controllers, *core.RequestEvent) error) {
+	rc.router.POST(path, withControllerClousure(rc.c, handler))
+}
+
+func (rc *RouteController) BindFunc(handler func(controllers.Controllers, *core.RequestEvent) error) {
+	rc.router.BindFunc(withControllerClousure(rc.c, handler))
 }
 
 func discardHandler(e *core.RequestEvent) error {
