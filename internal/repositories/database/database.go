@@ -33,6 +33,31 @@ func (db database) GetUserIdFromCredentials(email string, password string) (stri
 	return user.Id, nil
 }
 
+func (db database) ChechUserOwnsWallet(userId string, walletId string) error {
+	query := db.app.DB().Select("wallets.user_id as user", "wallets.id as wallet").
+		From("wallets").
+		Where(dbx.And(
+			dbx.NewExp("wallets.user_id = {:userId}", dbx.Params{"userId": userId}),
+			dbx.NewExp("wallets.id = {:walletId}", dbx.Params{"walletId": walletId}),
+		)).
+		Build()
+
+	data := struct {
+		User   string
+		Wallet string
+	}{}
+
+	if err := query.One(&data); err != nil {
+		return err
+	}
+
+	if data.Wallet != walletId || data.User != userId {
+		return fmt.Errorf("no rows affected when checking records")
+	}
+
+	return nil
+}
+
 func (db database) ChechUserOwnsAsset(userId string, assetId string) error {
 	query := db.app.DB().Select("wallets.user_id as user", "assets.id as asset").
 		From("wallets").

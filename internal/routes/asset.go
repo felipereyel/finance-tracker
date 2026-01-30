@@ -84,8 +84,14 @@ func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
 
 // missing wallet scope chec
 func assetCreate(c controllers.Controllers, e *core.RequestEvent) error {
+	userId := e.Get(userIdStoreKey).(string)
+
 	assetDTO := models.AssetCreateDTO{}
 	if err := e.BindBody(&assetDTO); err != nil {
+		return err
+	}
+
+	if err := c.User.ChechUserOwnsWallet(userId, assetDTO.Wallet); err != nil {
 		return err
 	}
 

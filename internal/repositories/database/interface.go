@@ -5,6 +5,7 @@ import "fintracker/internal/models"
 type Database interface {
 	// User methods
 	GetUserIdFromCredentials(email string, password string) (string, error)
+	ChechUserOwnsWallet(userId string, walletId string) error
 	ChechUserOwnsAsset(userId string, assetId string) error
 	ChechUserOwnsPrice(userId string, assetId string) error
 
