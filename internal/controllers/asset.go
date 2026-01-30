@@ -46,17 +46,7 @@ func (controller assetController) CreateAsset(dto models.AssetCreateDTO) (string
 	return newAsset.Id, nil
 }
 
-func (controller assetController) SummarizeAssets(walletFilter string, typeFilter string) (models.Summary, error) {
-	aggregated, err := controller.db.ListAssetAggregates(walletFilter, typeFilter)
-	if err != nil {
-		return models.EmptySummary, err
-	}
-
-	wallets, err := controller.db.ListWallets()
-	if err != nil {
-		return models.EmptySummary, err
-	}
-
+func (controller assetController) SummarizeAssets(userId string, walletFilter string, typeFilter string) (models.Summary, error) {
 	summary := models.Summary{
 		Total:      0,
 		Aggregates: make([]models.AssetAggregate, 0),
@@ -68,9 +58,27 @@ func (controller assetController) SummarizeAssets(walletFilter string, typeFilte
 		Wallets:        make([][]string, 0),
 	}
 
+	aggregated, err := controller.db.ListAssetAggregates(userId)
+	if err != nil {
+		return models.EmptySummary, err
+	}
+
 	for _, asset := range aggregated {
-		summary.Total += asset.LastPrice
+		if walletFilter != "" && asset.Wallet != walletFilter {
+			continue
+		}
+
+		if typeFilter != "" && asset.Type != typeFilter {
+			continue
+		}
+
 		summary.Aggregates = append(summary.Aggregates, asset)
+		summary.Total += asset.LastPrice
+	}
+
+	wallets, err := controller.db.ListWallets(userId)
+	if err != nil {
+		return models.EmptySummary, err
 	}
 
 	for _, wallet := range wallets {
@@ -80,8 +88,8 @@ func (controller assetController) SummarizeAssets(walletFilter string, typeFilte
 	return summary, nil
 }
 
-func (controller assetController) GetAssetOptions() (models.NewAssetOptions, error) {
-	wallets, err := controller.db.ListWallets()
+func (controller assetController) GetAssetOptions(userId string) (models.NewAssetOptions, error) {
+	wallets, err := controller.db.ListWallets(userId)
 	if err != nil {
 		return models.EmptyNewAssetOptions, err
 	}

@@ -87,9 +87,14 @@ func (db database) ChechUserOwnsPrice(userId string, priceId string) error {
 
 // Wallet methods
 
-func (db database) ListWallets() ([]models.Wallet, error) {
+func (db database) ListWallets(userId string) ([]models.Wallet, error) {
+	query := db.app.DB().
+		Select("id", "name").
+		From("wallets").
+		Where(dbx.NewExp("wallets.user_id = {:userId}", dbx.Params{"userId": userId}))
+
 	var wallets []models.Wallet
-	if err := db.app.DB().Select("id", "name").From("wallets").All(&wallets); err != nil {
+	if err := query.All(&wallets); err != nil {
 		return nil, err
 	}
 
@@ -184,28 +189,15 @@ var AssetAggregatesSelectFragment = `
 		ap.logged_at = (SELECT MAX(logged_at) FROM asset_prices WHERE asset_id = a.id)
 `
 
-func (db database) ListAssetAggregates(wallet string, asset_type string) ([]models.AssetAggregate, error) {
-	var ListAssetAggregatesQuery = AssetAggregatesSelectFragment + ` AND a.sell_date = '' ORDER BY w.name, ap.logged_at DESC`
+func (db database) ListAssetAggregates(userId string) ([]models.AssetAggregate, error) {
+	var ListAssetAggregatesQuery = AssetAggregatesSelectFragment + ` AND w.user_id = {:id} AND a.sell_date = '' ORDER BY w.name, ap.logged_at DESC`
 
 	var assets []models.AssetAggregate
-	if err := db.app.DB().NewQuery(ListAssetAggregatesQuery).All(&assets); err != nil {
+	if err := db.app.DB().NewQuery(ListAssetAggregatesQuery).Bind(dbx.Params{"id": userId}).All(&assets); err != nil {
 		return nil, err
 	}
 
-	var filtered []models.AssetAggregate
-	for _, asset := range assets {
-		if wallet != "" && asset.Wallet != wallet {
-			continue
-		}
-
-		if asset_type != "" && asset.Type != asset_type {
-			continue
-		}
-
-		filtered = append(filtered, asset)
-	}
-
-	return filtered, nil
+	return assets, nil
 }
 
 func (db database) GetAssetAggregateById(assetId string) (models.AssetAggregate, error) {

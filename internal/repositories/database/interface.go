@@ -9,7 +9,7 @@ type Database interface {
 	ChechUserOwnsPrice(userId string, assetId string) error
 
 	// Wallet methods
-	ListWallets() ([]models.Wallet, error)
+	ListWallets(userId string) ([]models.Wallet, error)
 
 	// Asset methods
 	CreateAsset(asset models.Asset) error
@@ -17,7 +17,7 @@ type Database interface {
 	GetAssetById(assetId string) (models.Asset, error)
 
 	// AssetAggregate methods
-	ListAssetAggregates(wallet string, assetType string) ([]models.AssetAggregate, error)
+	ListAssetAggregates(userId string) ([]models.AssetAggregate, error)
 	GetAssetAggregateById(assetId string) (models.AssetAggregate, error)
 
 	// Price methods
