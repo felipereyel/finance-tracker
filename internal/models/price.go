@@ -12,7 +12,6 @@ type Price struct {
 }
 
 type PriceCreateDTO struct {
-	AssetId  string
 	Value    float32 `form:"value"`
 	LoggedAt string  `form:"logged_at"`
 	Comment  string  `form:"comment"` // nullable
@@ -24,12 +23,12 @@ type PriceUpdateDTO struct {
 
 var EmptyPrice = Price{}
 
-func CreateNewPrice(dto PriceCreateDTO) Price {
+func CreateNewPrice(assetId string, dto PriceCreateDTO) Price {
 	return Price{
 		Id:       GenerateId(),
 		Created:  GenerateTimestamp(),
 		Updated:  GenerateTimestamp(),
-		AssetId:  dto.AssetId,
+		AssetId:  assetId,
 		Value:    dto.Value,
 		LoggedAt: dto.LoggedAt,
 		Comment:  dto.Comment,

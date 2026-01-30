@@ -56,6 +56,7 @@ go tool air serve --http=0.0.0.0:8090
 - [x] add auth scope to routes
 - [ ] add more charts to account summary
 - [ ] add error fallback
+- [ ] refactor withControllerClousure
 
 ### Later
 

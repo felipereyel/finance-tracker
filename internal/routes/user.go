@@ -3,7 +3,6 @@ package routes
 import (
 	"fintracker/internal/controllers"
 	"fintracker/internal/urls"
-	"fmt"
 
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -35,7 +34,6 @@ func assetScopeCheckMiddleware(c controllers.Controllers, e *core.RequestEvent) 
 	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 	userId := e.Get(userIdStoreKey).(string)
 
-	fmt.Println(assetId, userId)
 	if err := c.User.ChechUserOwnsAsset(userId, assetId); err != nil {
 		return e.NotFoundError("asset not found", "")
 	}

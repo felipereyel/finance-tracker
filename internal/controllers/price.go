@@ -35,7 +35,7 @@ func (controller priceController) ListPrices(assetId string) ([]models.Price, er
 }
 
 func (controller priceController) CreatePrice(assetId string, dto models.PriceCreateDTO) error {
-	newPrice := models.CreateNewPrice(dto)
+	newPrice := models.CreateNewPrice(assetId, dto)
 	return controller.db.CreatePrice(newPrice)
 }
 

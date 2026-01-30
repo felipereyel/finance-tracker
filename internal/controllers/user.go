@@ -12,6 +12,10 @@ func (controller userController) GetUserIdFromCredentials(email string, password
 	return controller.db.GetUserIdFromCredentials(email, password)
 }
 
+func (controller userController) ChechUserOwnsWallet(userId string, walletId string) error {
+	return controller.db.ChechUserOwnsWallet(userId, walletId)
+}
+
 func (controller userController) ChechUserOwnsAsset(userId string, assetId string) error {
 	return controller.db.ChechUserOwnsAsset(userId, assetId)
 }

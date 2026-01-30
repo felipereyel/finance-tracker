@@ -34,8 +34,9 @@ func assetRedirect(e *core.RequestEvent) error {
 func assetList(c controllers.Controllers, e *core.RequestEvent) error {
 	walletFilter := e.Request.URL.Query().Get("wallet")
 	typeFilter := e.Request.URL.Query().Get("type")
+	userId := e.Get(userIdStoreKey).(string)
 
-	summary, err := c.Asset.SummarizeAssets(walletFilter, typeFilter)
+	summary, err := c.Asset.SummarizeAssets(userId, walletFilter, typeFilter)
 	if err != nil {
 		return err
 	}
@@ -45,8 +46,9 @@ func assetList(c controllers.Controllers, e *core.RequestEvent) error {
 
 func accountChart(c controllers.Controllers, e *core.RequestEvent) error {
 	// TODO: add filters to chart
+	userId := e.Get(userIdStoreKey).(string)
 
-	summary, err := c.Asset.SummarizeAssets("", "")
+	summary, err := c.Asset.SummarizeAssets(userId, "", "")
 	if err != nil {
 		return err
 	}
@@ -56,8 +58,9 @@ func accountChart(c controllers.Controllers, e *core.RequestEvent) error {
 
 func accountSummary(c controllers.Controllers, e *core.RequestEvent) error {
 	// TODO: add filters to chart
+	userId := e.Get(userIdStoreKey).(string)
 
-	summary, err := c.Asset.SummarizeAssets("", "")
+	summary, err := c.Asset.SummarizeAssets(userId, "", "")
 	if err != nil {
 		return err
 	}
@@ -69,8 +72,9 @@ func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
 	// TODO: init popup with selected fiels based in query
 	// wallet := e.Request.URL.Query().Get("wallet")
 	// asset_type := e.Request.URL.Query().Get("type")
+	userId := e.Get(userIdStoreKey).(string)
 
-	options, err := c.Asset.GetAssetOptions()
+	options, err := c.Asset.GetAssetOptions(userId)
 	if err != nil {
 		return err
 	}
@@ -78,9 +82,16 @@ func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
 	return sendPage(e, components.NewAsset(options))
 }
 
+// missing wallet scope chec
 func assetCreate(c controllers.Controllers, e *core.RequestEvent) error {
+	userId := e.Get(userIdStoreKey).(string)
+
 	assetDTO := models.AssetCreateDTO{}
 	if err := e.BindBody(&assetDTO); err != nil {
+		return err
+	}
+
+	if err := c.User.ChechUserOwnsWallet(userId, assetDTO.Wallet); err != nil {
 		return err
 	}
 
@@ -158,7 +169,7 @@ func assetPricePopup(c controllers.Controllers, e *core.RequestEvent) error {
 func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
 	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
-	priceDTO := models.PriceCreateDTO{AssetId: assetId}
+	priceDTO := models.PriceCreateDTO{}
 	if err := e.BindBody(&priceDTO); err != nil {
 		return err
 	}
@@ -167,6 +178,6 @@ func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
 		return err
 	}
 
-	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(priceDTO.AssetId))
+	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(assetId))
 	return e.JSON(200, map[string]any{"success": true})
 }
