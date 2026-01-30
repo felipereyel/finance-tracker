@@ -158,7 +158,7 @@ func assetPricePopup(c controllers.Controllers, e *core.RequestEvent) error {
 func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
 	assetId := e.Request.PathValue(urls.AssetIdPathParam)
 
-	priceDTO := models.PriceCreateDTO{AssetId: assetId}
+	priceDTO := models.PriceCreateDTO{}
 	if err := e.BindBody(&priceDTO); err != nil {
 		return err
 	}
@@ -167,6 +167,6 @@ func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
 		return err
 	}
 
-	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(priceDTO.AssetId))
+	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(assetId))
 	return e.JSON(200, map[string]any{"success": true})
 }

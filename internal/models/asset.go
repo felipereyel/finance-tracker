@@ -54,13 +54,13 @@ type Asset struct {
 	Id           string
 	Created      string
 	Updated      string
-	Name         string  `form:"name"`
-	Type         string  `form:"type"`
-	Wallet       string  `form:"wallet"`
-	Comment      string  `form:"comment"` // nullable
-	InitialPrice float32 `form:"initial_price"`
-	BuyDate      string  `form:"buy_date"`
-	SellDate     string  `form:"sell_date"` // nullable
+	Name         string
+	Type         string
+	Wallet       string
+	Comment      string // nullable
+	InitialPrice float32
+	BuyDate      string
+	SellDate     string // nullable
 }
 
 type AssetCreateDTO struct {

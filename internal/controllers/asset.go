@@ -33,13 +33,12 @@ func (controller assetController) CreateAsset(dto models.AssetCreateDTO) (string
 	}
 
 	priceDTO := models.PriceCreateDTO{
-		AssetId:  newAsset.Id,
 		Value:    newAsset.InitialPrice,
 		LoggedAt: newAsset.BuyDate,
 		Comment:  "Initial price",
 	}
 
-	newPrice := models.CreateNewPrice(priceDTO)
+	newPrice := models.CreateNewPrice(newAsset.Id, priceDTO)
 	if err := controller.db.CreatePrice(newPrice); err != nil {
 		return "", err
 	}
