@@ -43,6 +43,67 @@ go run main.go serve --http=0.0.0.0:8090
 go tool air serve --http=0.0.0.0:8090
 ```
 
+## Application Screens
+
+### Assets List Screen
+- **Template**: `AssetSummaryPage`
+- **Route**: `/assets`
+- **Features**:
+  - Displays all assets in a sortable table
+  - Filters by asset type and wallet
+  - Shows name, wallet, type, buy date, buy price, last date, and last price
+  - Navigation to summary page and create new asset modal
+
+### Summary Dashboard
+- **Template**: `SummaryPage`
+- **Route**: `/summary`
+- **Features**:
+  - Displays financial summary charts and analytics
+  - Embedded iframe for comprehensive chart visualization
+  - Overview of portfolio performance
+
+### Asset Details Screen
+- **Template**: `AssetDetailsPage`
+- **Route**: `/assets/{id}`
+- **Features**:
+  - Detailed view of individual asset
+  - Price history chart visualization
+  - Editable fields for sell date and comments (auto-save)
+  - Read-only display of asset information
+  - Links to price history and add new price (if not sold)
+
+### Asset Prices History Screen
+- **Template**: `AssetPricesPage`
+- **Route**: `/assets/{id}/prices`
+- **Features**:
+  - Complete price history for an asset
+  - Table showing date, value, and comments
+  - Link to individual price details
+  - Option to add new price entries
+
+### New Asset Modal
+- **Template**: `NewAsset`
+- **Features**:
+  - Modal form for creating new assets
+  - Fields: name, wallet selection, asset type, initial price, buy date, comment
+  - Form validation and submission
+
+### New Price Modal
+- **Template**: `NewPrice`
+- **Features**:
+  - Modal form for adding price updates to existing assets
+  - Fields: price, log date, comment
+  - Pre-fills with current asset price
+
+### Price Details Screen
+- **Template**: `PricePage`
+- **Route**: `/prices/{id}`
+- **Features**:
+  - Detailed view of individual price entry
+  - Shows value, gain calculation, and logged date
+  - Editable comment field (auto-save)
+  - Read-only display of price information
+
 ## TODO:
 
 ### Must
