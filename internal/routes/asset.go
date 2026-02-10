@@ -12,15 +12,16 @@ import (
 )
 
 func setupScopedAssetsRoutes(group *router.RouterGroup[*core.RequestEvent], c controllers.Controllers) {
-	group.BindFunc(withControllerClousure(c, assetScopeCheckMiddleware))
+	rc := NewRouteController(group, c)
+	rc.BindFunc(assetScopeCheckMiddleware)
 
-	group.GET(urls.Root, withControllerClousure(c, assetDetails))
-	group.POST(urls.Root, withControllerClousure(c, assetUpdate))
+	rc.GET(urls.Root, assetDetails)
+	rc.POST(urls.Root, assetUpdate)
 
-	group.GET(urls.AssetIdPricesPath, withControllerClousure(c, assetPriceTable))
-	group.POST(urls.AssetIdPricesPath, withControllerClousure(c, assetPriceCreate))
-	group.GET(urls.AssetIdPricesChartPath, withControllerClousure(c, assetPriceChart))
-	group.GET(urls.AssetIdPricesPopupPath, withControllerClousure(c, assetPricePopup))
+	rc.GET(urls.AssetIdPricesPath, assetPriceTable)
+	rc.POST(urls.AssetIdPricesPath, assetPriceCreate)
+	rc.GET(urls.AssetIdPricesChartPath, assetPriceChart)
+	rc.GET(urls.AssetIdPricesPopupPath, assetPricePopup)
 }
 
 func assetRedirect(e *core.RequestEvent) error {
