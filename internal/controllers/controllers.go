@@ -5,15 +5,17 @@ import (
 )
 
 type Controllers struct {
-	Price priceController
-	Asset assetController
-	User  userController
+	Price   priceController
+	Asset   assetController
+	User    userController
+	History historyController
 }
 
 func NewControllers(db database.Database) Controllers {
 	return Controllers{
-		Price: priceController{db},
-		Asset: assetController{db},
-		User:  userController{db},
+		Price:   priceController{db},
+		Asset:   assetController{db},
+		User:    userController{db},
+		History: historyController{db},
 	}
 }

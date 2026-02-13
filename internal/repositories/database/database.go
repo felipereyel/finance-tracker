@@ -303,3 +303,60 @@ func (db database) ListPricesByAssetId(assetId string) ([]models.Price, error) {
 
 	return prices, nil
 }
+
+// History methods
+
+func (db database) GetHistoricalPrices(userId string) ([]models.AssetPriceHistory, error) {
+	// Query to get all assets with their wallet info for a user (including sold assets)
+	assetsQuery := `
+		SELECT
+			a.id as asset_id,
+			a.name as asset_name,
+			a.type as asset_type,
+			a.wallet as wallet_id,
+			a.sell_date as sell_date,
+			w.name as wallet_name
+		FROM assets a
+		INNER JOIN wallets w ON a.wallet = w.id
+		WHERE w.user_id = {:userId}
+		ORDER BY w.name, a.name
+	`
+
+	type AssetInfo struct {
+		AssetId    string `db:"asset_id"`
+		AssetName  string `db:"asset_name"`
+		AssetType  string `db:"asset_type"`
+		WalletId   string `db:"wallet_id"`
+		SellDate   string `db:"sell_date"`
+		WalletName string `db:"wallet_name"`
+	}
+
+	var assetInfos []AssetInfo
+	if err := db.app.DB().NewQuery(assetsQuery).Bind(dbx.Params{"userId": userId}).All(&assetInfos); err != nil {
+		return nil, err
+	}
+
+	var histories []models.AssetPriceHistory
+
+	// For each asset, get its price history
+	for _, info := range assetInfos {
+		prices, err := db.ListPricesByAssetId(info.AssetId)
+		if err != nil {
+			return nil, err
+		}
+
+		history := models.AssetPriceHistory{
+			AssetId:    info.AssetId,
+			AssetName:  info.AssetName,
+			AssetType:  info.AssetType,
+			WalletId:   info.WalletId,
+			WalletName: info.WalletName,
+			SellDate:   info.SellDate,
+			Prices:     prices,
+		}
+
+		histories = append(histories, history)
+	}
+
+	return histories, nil
+}

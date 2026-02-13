@@ -30,6 +30,9 @@ func setupAuthenticatedRoutes(group *router.RouterGroup[*core.RequestEvent], c c
 	group.GET(urls.SummaryPath, withControllerClousure(c, accountSummary))
 	group.GET(urls.SummaryChartPath, withControllerClousure(c, accountChart))
 
+	group.GET(urls.HistoryPath, withControllerClousure(c, historyPage))
+	group.GET(urls.HistoryChartPath, withControllerClousure(c, historyChart))
+
 	group.GET(urls.AssetsPath, withControllerClousure(c, assetList))
 	group.POST(urls.AssetsPath, withControllerClousure(c, assetCreate))
 	group.GET(urls.AssetsPopupPath, withControllerClousure(c, assetCreatePopup))

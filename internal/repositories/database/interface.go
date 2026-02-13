@@ -26,4 +26,7 @@ type Database interface {
 	UpdatePrice(price models.Price) error
 	GetPriceById(priceId string) (models.Price, error)
 	ListPricesByAssetId(assetId string) ([]models.Price, error)
+
+	// History methods
+	GetHistoricalPrices(userId string) ([]models.AssetPriceHistory, error)
 }

@@ -57,19 +57,12 @@ func accountChart(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func accountSummary(c controllers.Controllers, e *core.RequestEvent) error {
-	userId := e.Get(userIdStoreKey).(string)
 	aggregation := e.Request.URL.Query().Get(urls.AggregationQueryParam)
 	if aggregation == "" {
 		aggregation = "total"
 	}
 
-	summary, err := c.Asset.SummarizeAssets(userId, "", "")
-	if err != nil {
-		return err
-	}
-
-	summary.Aggregation = aggregation
-	return sendPage(e, components.SummaryPage(summary))
+	return sendPage(e, components.SummaryPage(aggregation))
 }
 
 func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
@@ -184,4 +177,28 @@ func assetPriceCreate(c controllers.Controllers, e *core.RequestEvent) error {
 
 	e.Response.Header().Set("HX-Redirect", urls.AssetIdGroupURL(assetId))
 	return e.JSON(200, map[string]any{"success": true})
+}
+
+func historyPage(c controllers.Controllers, e *core.RequestEvent) error {
+	aggregation := e.Request.URL.Query().Get(urls.AggregationQueryParam)
+	if aggregation == "" {
+		aggregation = "total"
+	}
+
+	return sendPage(e, components.HistoryPage(aggregation))
+}
+
+func historyChart(c controllers.Controllers, e *core.RequestEvent) error {
+	userId := e.Get(userIdStoreKey).(string)
+	aggregation := e.Request.URL.Query().Get(urls.AggregationQueryParam)
+	if aggregation == "" {
+		aggregation = "total"
+	}
+
+	history, err := c.History.GetHistory(userId, aggregation)
+	if err != nil {
+		return err
+	}
+
+	return components.HistoryChart(history, e.Response)
 }

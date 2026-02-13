@@ -32,6 +32,21 @@ var SummaryURL = AuthenticatedUrl + SummaryPath
 var SummaryChartPath = "/summary-chart"
 var SummaryChartURL = AuthenticatedUrl + SummaryChartPath
 
+// History URLs
+var HistoryPath = "/history"
+var HistoryURL = AuthenticatedUrl + HistoryPath
+
+var HistoryChartPath = "/history-chart"
+var HistoryChartURL = AuthenticatedUrl + HistoryChartPath
+
+func HistoryURLWithAggregation(aggregation string) string {
+	return fmt.Sprintf("%s?%s=%s", HistoryURL, AggregationQueryParam, aggregation)
+}
+
+func HistoryChartURLWithAggregation(aggregation string) string {
+	return fmt.Sprintf("%s?%s=%s", HistoryChartURL, AggregationQueryParam, aggregation)
+}
+
 var AssetsRedirectPath = "/assets-redirect"
 var AssetsRedirectURL = AuthenticatedUrl + AssetsRedirectPath
 

@@ -281,3 +281,124 @@ function (info) {
 	return tooltip;
 }
 `
+
+func HistoryChart(history models.History, w io.Writer) error {
+	page := components.NewPage().SetAssetsHost(urls.StaticsURL("assets/"))
+	line := charts.NewLine()
+
+	// Calculate min/max for axis
+	var maxValue float32 = 0.0
+	var minValue float32 = 0.0
+	minDate := time.Date(2100, time.January, 1, 0, 0, 0, 0, time.Local)
+	maxDate := time.Date(1900, time.January, 1, 0, 0, 0, 0, time.Local)
+
+	// If no series or empty, use dummy data
+	if len(history.Series) == 0 {
+		history.Series = generateDummySeries()
+	}
+
+	for _, series := range history.Series {
+		items := make([]opts.LineData, 0)
+		for _, point := range series.Points {
+			t, err := time.Parse(DATE_LAYOUT, point.Date[:DATE_LAYOUT_LEN])
+			if err != nil {
+				fmt.Println("Error parsing date:", err)
+				continue
+			}
+
+			if point.Value > maxValue || maxValue == 0.0 {
+				maxValue = point.Value
+			}
+			if point.Value < minValue || minValue == 0.0 {
+				minValue = point.Value
+			}
+			if t.Before(minDate) {
+				minDate = t
+			}
+			if t.After(maxDate) {
+				maxDate = t
+			}
+
+			items = append(items, opts.LineData{
+				Value: []interface{}{t, point.Value},
+			})
+		}
+		line.AddSeries(series.Name, items,
+			charts.WithLineChartOpts(opts.LineChart{
+				Symbol: "none",
+			}),
+		)
+	}
+
+	line.SetGlobalOptions(
+		charts.WithInitializationOpts(opts.Initialization{
+			Theme:           types.ThemeWonderland,
+			BackgroundColor: "#0F172A",
+		}),
+		charts.WithYAxisOpts(opts.YAxis{
+			Min: floorByMagnitude(minValue, 100),
+			Max: ceilByMagnitude(maxValue, 100),
+		}),
+		charts.WithXAxisOpts(opts.XAxis{
+			Type: "time",
+			Min:  minDate,
+		}),
+		charts.WithTooltipOpts(opts.Tooltip{
+			Show:    opts.Bool(true),
+			Trigger: "axis",
+			Formatter: opts.FuncOpts(`
+				function (info) {
+					var result = '<b>' + info[0].axisValueLabel + '</b><br/>';
+					for (var i = 0; i < info.length; i++) {
+						var value = info[i].value[1].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+						result += info[i].marker + ' ' + info[i].seriesName + ': ' + value + '<br/>';
+					}
+					return result;
+				}
+			`),
+		}),
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(true),
+			Top:  "5%",
+			TextStyle: &opts.TextStyle{
+				Color: "#E2E8F0",
+			},
+		}),
+	)
+
+	page.AddCharts(line)
+	return page.Render(w)
+}
+
+func generateDummySeries() []models.HistorySeries {
+	series := []models.HistorySeries{
+		{
+			Name:   "Wallet 1",
+			Points: generateDummyPoints(30, 1000, 5000),
+		},
+		{
+			Name:   "Wallet 2",
+			Points: generateDummyPoints(30, 2000, 8000),
+		},
+		{
+			Name:   "Wallet 3",
+			Points: generateDummyPoints(30, 1500, 6000),
+		},
+	}
+	return series
+}
+
+func generateDummyPoints(count int, minVal, maxVal float32) []models.HistoryDataPoint {
+	points := make([]models.HistoryDataPoint, count)
+	baseDate := time.Date(2024, 1, 1, 0, 0, 0, 0, time.Local)
+
+	for i := 0; i < count; i++ {
+		date := baseDate.AddDate(0, 0, i)
+		value := minVal + float32(i)*((maxVal-minVal)/float32(count))
+		points[i] = models.HistoryDataPoint{
+			Date:  date.Format(DATE_LAYOUT),
+			Value: value,
+		}
+	}
+	return points
+}

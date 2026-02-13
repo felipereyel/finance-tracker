@@ -63,6 +63,9 @@ templ AssetSummaryPage(summary models.Summary) {
 						<a href={ urls.SummaryURL } class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 							Summary
 						</a>
+						<a href={ urls.HistoryURL } class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+							History
+						</a>
 						<button hx-get={ urls.AssetsPopupURL } hx-target="#body" hx-swap="beforeend" class="p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 							New Asset
 						</button>
@@ -125,7 +128,7 @@ templ AssetSummaryPage(summary models.Summary) {
 	}
 }
 
-templ SummaryPage(summary models.Summary) {
+templ SummaryPage(aggregation string) {
 	@rawPage("Assets List") {
 		<div class="px-4 sm:px-8 m-auto pt-2">
 			<div class="flex flex-col">
@@ -139,20 +142,20 @@ templ SummaryPage(summary models.Summary) {
 					</div>
 					<div class="flex flex-row items-center">
 						<div class="inline-flex rounded-md shadow-sm" role="group">
-							<a href={ urls.SummaryURLWithAggregation("wallet") } class={ "px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", summary.Aggregation == "wallet"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", summary.Aggregation != "wallet") }>
+							<a href={ urls.SummaryURLWithAggregation("wallet") } class={ "px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "wallet"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "wallet") }>
 								By Wallet
 							</a>
-							<a href={ urls.SummaryURLWithAggregation("type") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", summary.Aggregation == "type"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", summary.Aggregation != "type") }>
+							<a href={ urls.SummaryURLWithAggregation("type") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "type"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "type") }>
 								By Asset Type
 							</a>
-							<a href={ urls.SummaryURLWithAggregation("total") } class={ "px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", summary.Aggregation == "total" || summary.Aggregation == ""), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", summary.Aggregation != "total" && summary.Aggregation != "") }>
+							<a href={ urls.SummaryURLWithAggregation("total") } class={ "px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "total" || aggregation == ""), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "total" && aggregation != "") }>
 								Total
 							</a>
 						</div>
 					</div>
 				</div>
 				<div class="relative overflow-x-auto sm:rounded-lg mt-4 w-full">
-					<iframe src={ urls.SummaryChartURLWithAggregation(summary.Aggregation) } width="100%" height="800vh" frameborder="0"></iframe>
+					<iframe src={ urls.SummaryChartURLWithAggregation(aggregation) } width="100%" height="800vh" frameborder="0"></iframe>
 				</div>
 			</div>
 		</div>
@@ -446,6 +449,40 @@ templ PricePage(summary models.Price) {
 							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{ summary.Comment }</textarea>
 						</div>
 					</form>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ HistoryPage(aggregation string) {
+	@rawPage("History") {
+		<div class="px-4 sm:px-8 m-auto pt-2">
+			<div class="flex flex-col">
+				<div class="flex flex-row justify-between items-center">
+					<div class="flex flex-row items-center gap-4 text-2xl">
+						<a href={ urls.AssetsURL }>
+							<img src={ urls.StaticsURL("assets/coin.svg") } class="w-10 h-10"/>
+						</a>
+						<p>></p>
+						<a href={ urls.HistoryURL }>History</a>
+					</div>
+					<div class="flex flex-row items-center">
+						<div class="inline-flex rounded-md shadow-sm" role="group">
+							<a href={ urls.HistoryURLWithAggregation("wallet") } class={ "px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "wallet"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "wallet") }>
+								By Wallet
+							</a>
+							<a href={ urls.HistoryURLWithAggregation("type") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "type"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "type") }>
+								By Asset Type
+							</a>
+							<a href={ urls.HistoryURLWithAggregation("total") } class={ "px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "total" || aggregation == ""), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "total" && aggregation != "") }>
+								Total
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="relative overflow-x-auto sm:rounded-lg mt-4 w-full">
+					<iframe src={ urls.HistoryChartURLWithAggregation(aggregation) } width="100%" height="800vh" frameborder="0"></iframe>
 				</div>
 			</div>
 		</div>
