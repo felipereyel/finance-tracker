@@ -23,33 +23,42 @@ func ceilByMagnitude(value float32, magnitude float32) float32 {
 }
 
 func SummaryChart(summary models.Summary, w io.Writer) error {
+	page := components.NewPage().SetAssetsHost(urls.StaticsURL("assets/"))
+
+	switch summary.Aggregation {
+	case "wallet":
+		walletPie := buildWalletPieChart(summary)
+		page.AddCharts(walletPie)
+	case "type":
+		typePie := buildTypePieChart(summary)
+		page.AddCharts(typePie)
+	case "total":
+		totalChart := buildTotalChart(summary)
+		page.AddCharts(totalChart)
+	default:
+		// Default to showing both charts
+		walletPie := buildWalletPieChart(summary)
+		typePie := buildTypePieChart(summary)
+		page.AddCharts(walletPie, typePie)
+	}
+
+	return page.Render(w)
+}
+
+func formatCurrency(value float32) string {
+	return fmt.Sprintf("R$%.2f", value)
+}
+
+func buildWalletPieChart(summary models.Summary) *charts.Pie {
 	walletMap := make(map[string]float32)
 	for _, wallet := range summary.Wallets {
 		walletMap[wallet[1]] = 0.0
-	}
-
-	typeMap := make(map[string]float32)
-	for _, assetType := range summary.AssetTypes {
-		typeMap[assetType[0]] = 0.0
 	}
 
 	for _, asset := range summary.Aggregates {
 		if _, ok := walletMap[asset.WalletName]; ok {
 			walletMap[asset.WalletName] += asset.LastPrice
 		}
-
-		if _, ok := typeMap[asset.Type]; ok {
-			typeMap[asset.Type] += asset.LastPrice
-		}
-	}
-
-	typeItems := make([]opts.PieData, 0)
-	for assetType, value := range typeMap {
-		if value == 0.0 {
-			continue
-		}
-
-		typeItems = append(typeItems, opts.PieData{Name: models.GetLabelForType(assetType), Value: value})
 	}
 
 	walletItems := make([]opts.PieData, 0)
@@ -57,7 +66,6 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		if value == 0.0 {
 			continue
 		}
-
 		walletItems = append(walletItems, opts.PieData{Name: wallet, Value: value})
 	}
 
@@ -69,12 +77,16 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		charts.WithInitializationOpts(opts.Initialization{
 			Theme:           types.ThemeWonderland,
 			BackgroundColor: "#0F172A",
-			Height:          "200px",
+			Height:          "400px",
 		}),
 		charts.WithTitleOpts(opts.Title{
-			Title: "Wallet Summary",
+			Title:    "Portifolio By Wallet",
+			Subtitle: "Total: " + formatCurrency(summary.Total),
 			TitleStyle: &opts.TextStyle{
 				Color: "#E2E8F0",
+			},
+			SubtitleStyle: &opts.TextStyle{
+				Color: "#94A3B8",
 			},
 		}),
 	)
@@ -86,6 +98,29 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		}),
 	)
 
+	return walletPie
+}
+
+func buildTypePieChart(summary models.Summary) *charts.Pie {
+	typeMap := make(map[string]float32)
+	for _, assetType := range summary.AssetTypes {
+		typeMap[assetType[0]] = 0.0
+	}
+
+	for _, asset := range summary.Aggregates {
+		if _, ok := typeMap[asset.Type]; ok {
+			typeMap[asset.Type] += asset.LastPrice
+		}
+	}
+
+	typeItems := make([]opts.PieData, 0)
+	for assetType, value := range typeMap {
+		if value == 0.0 {
+			continue
+		}
+		typeItems = append(typeItems, opts.PieData{Name: models.GetLabelForType(assetType), Value: value})
+	}
+
 	typePie := charts.NewPie()
 	typePie.SetGlobalOptions(
 		charts.WithLegendOpts(opts.Legend{
@@ -94,12 +129,16 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		charts.WithInitializationOpts(opts.Initialization{
 			Theme:           types.ThemeWonderland,
 			BackgroundColor: "#0F172A",
-			Height:          "200px",
+			Height:          "400px",
 		}),
 		charts.WithTitleOpts(opts.Title{
-			Title: "Asset Type Summary",
+			Title:    "Portifolio By Asset Type",
+			Subtitle: "Total: " + formatCurrency(summary.Total),
 			TitleStyle: &opts.TextStyle{
 				Color: "#E2E8F0",
+			},
+			SubtitleStyle: &opts.TextStyle{
+				Color: "#94A3B8",
 			},
 		}),
 	)
@@ -111,7 +150,40 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		}),
 	)
 
-	return components.NewPage().AddCharts(walletPie, typePie).SetAssetsHost(urls.StaticsURL("assets/")).Render(w)
+	return typePie
+}
+
+func buildTotalChart(summary models.Summary) *charts.Pie {
+	totalPie := charts.NewPie()
+	totalPie.SetGlobalOptions(
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
+		}),
+		charts.WithInitializationOpts(opts.Initialization{
+			Theme:           types.ThemeWonderland,
+			BackgroundColor: "#0F172A",
+			Height:          "400px",
+		}),
+		charts.WithTitleOpts(opts.Title{
+			Title:    "Total Portfolio Value",
+			Subtitle: "Total: " + formatCurrency(summary.Total),
+			TitleStyle: &opts.TextStyle{
+				Color: "#E2E8F0",
+			},
+			SubtitleStyle: &opts.TextStyle{
+				Color: "#94A3B8",
+			},
+		}),
+	)
+
+	totalPie.AddSeries("total", []opts.PieData{{Name: "Total", Value: summary.Total}},
+		charts.WithLabelOpts(opts.Label{
+			Show:      opts.Bool(true),
+			Formatter: "{b}: R${c}",
+		}),
+	)
+
+	return totalPie
 }
 
 var DATE_LAYOUT = "2006-01-02"

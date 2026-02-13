@@ -5,8 +5,8 @@ import "fmt"
 var AssetsPath = "/assets"
 var AssetsURL = AuthenticatedUrl + AssetsPath
 
-func AssetsURLWithQuey(walletFilter string, typefilter string) string {
-	return fmt.Sprintf("%s?wallet=%s&type=%s", AssetsURL, walletFilter, typefilter)
+func AssetsURLWithQuery(walletFilter string, typefilter string) string {
+	return fmt.Sprintf("%s?%s=%s&%s=%s", AssetsURL, WalletQueryParam, walletFilter, TypeQueryParam, typefilter)
 }
 
 // ASSET ID GROUP

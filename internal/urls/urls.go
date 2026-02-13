@@ -13,6 +13,19 @@ func StaticsURL(path string) string {
 
 var AuthenticatedUrl = "/u"
 
+// Query Parameters
+var WalletQueryParam = "wallet"
+var TypeQueryParam = "type"
+var AggregationQueryParam = "aggregation"
+
+func SummaryURLWithAggregation(aggregation string) string {
+	return fmt.Sprintf("%s?%s=%s", SummaryURL, AggregationQueryParam, aggregation)
+}
+
+func SummaryChartURLWithAggregation(aggregation string) string {
+	return fmt.Sprintf("%s?%s=%s", SummaryChartURL, AggregationQueryParam, aggregation)
+}
+
 var SummaryPath = "/summary"
 var SummaryURL = AuthenticatedUrl + SummaryPath
 

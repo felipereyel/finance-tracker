@@ -67,8 +67,8 @@ templ AssetSummaryPage(summary models.Summary) {
 							New Asset
 						</button>
 						<form class="flex flex-row justify-between items-center gap-4" hx-trigger="change" hx-get={ urls.AssetsRedirectURL } hx-target="this" hx-push-url="true">
-							@selectInput("type", summary.AssetTypes, summary.SelectedType)
-							@selectInput("wallet", summary.Wallets, summary.SelectedWallet)
+							@selectInput(urls.TypeQueryParam, summary.AssetTypes, summary.SelectedType)
+							@selectInput(urls.WalletQueryParam, summary.Wallets, summary.SelectedWallet)
 						</form>
 					</div>
 				</div>
@@ -137,9 +137,22 @@ templ SummaryPage(summary models.Summary) {
 						<p>></p>
 						<a href={ urls.SummaryURL }>Summary</a>
 					</div>
+					<div class="flex flex-row items-center">
+						<div class="inline-flex rounded-md shadow-sm" role="group">
+							<a href={ urls.SummaryURLWithAggregation("wallet") } class={ "px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", summary.Aggregation == "wallet"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", summary.Aggregation != "wallet") }>
+								By Wallet
+							</a>
+							<a href={ urls.SummaryURLWithAggregation("type") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", summary.Aggregation == "type"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", summary.Aggregation != "type") }>
+								By Asset Type
+							</a>
+							<a href={ urls.SummaryURLWithAggregation("total") } class={ "px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", summary.Aggregation == "total" || summary.Aggregation == ""), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", summary.Aggregation != "total" && summary.Aggregation != "") }>
+								Total
+							</a>
+						</div>
+					</div>
 				</div>
 				<div class="relative overflow-x-auto sm:rounded-lg mt-4 w-full">
-					<iframe src={ urls.SummaryChartURL } width="100%" height="800vh" frameborder="0"></iframe>
+					<iframe src={ urls.SummaryChartURLWithAggregation(summary.Aggregation) } width="100%" height="800vh" frameborder="0"></iframe>
 				</div>
 			</div>
 		</div>

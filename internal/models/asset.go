@@ -43,6 +43,8 @@ type Summary struct {
 
 	Wallets        [][]string
 	SelectedWallet string
+
+	Aggregation string
 }
 
 type NewAssetOptions struct {
