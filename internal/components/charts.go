@@ -73,6 +73,9 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		}),
 		charts.WithTitleOpts(opts.Title{
 			Title: "Wallet Summary",
+			TitleStyle: &opts.TextStyle{
+				Color: "#E2E8F0",
+			},
 		}),
 	)
 
@@ -95,6 +98,9 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 		}),
 		charts.WithTitleOpts(opts.Title{
 			Title: "Asset Type Summary",
+			TitleStyle: &opts.TextStyle{
+				Color: "#E2E8F0",
+			},
 		}),
 	)
 
