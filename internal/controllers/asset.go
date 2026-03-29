@@ -46,16 +46,16 @@ func (controller assetController) CreateAsset(dto models.AssetCreateDTO) (string
 	return newAsset.Id, nil
 }
 
-func (controller assetController) SummarizeAssets(userId string, walletFilter string, typeFilter string) (models.Summary, error) {
+func (controller assetController) SummarizeAssets(userId string, walletFilter string, tagFilter string) (models.Summary, error) {
 	summary := models.Summary{
 		Total:      0,
 		Aggregates: make([]models.AssetAggregate, 0),
 
-		AssetTypes:   models.AssetTypes,
-		SelectedType: typeFilter,
-
 		SelectedWallet: walletFilter,
 		Wallets:        make([][]string, 0),
+
+		AssetTags:   models.AssetTags,
+		SelectedTag: tagFilter,
 	}
 
 	aggregated, err := controller.db.ListAssetAggregates(userId)
@@ -68,7 +68,7 @@ func (controller assetController) SummarizeAssets(userId string, walletFilter st
 			continue
 		}
 
-		if typeFilter != "" && asset.Type != typeFilter {
+		if tagFilter != "" && !models.TagContains(asset.Tag, tagFilter) {
 			continue
 		}
 
@@ -95,8 +95,8 @@ func (controller assetController) GetAssetOptions(userId string) (models.NewAsse
 	}
 
 	options := models.NewAssetOptions{
-		AssetTypes: models.AssetTypes,
-		Wallets:    make([][]string, 0),
+		AssetTags: models.AssetTags,
+		Wallets:   make([][]string, 0),
 	}
 
 	for _, wallet := range wallets {

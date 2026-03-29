@@ -1,29 +1,71 @@
 package models
 
-// Type:  "fii" | "federal_bond" | "cdb" | "hedge_fund" | "stock" | "other"
-var AssetTypes = [][]string{
-	{"fii", "FII"},
-	{"federal_bond", "Federal Bond"},
-	{"cdb", "CDB"},
-	{"hedge_fund", "Hedge Fund"},
-	{"stock", "Stock"},
-	{"other", "Other"},
+import (
+	"encoding/json"
+	"strings"
+)
+
+// ParseTags parses a PocketBase JSON-encoded tag string (e.g. `["A","B"]`) into a []string.
+// Returns an empty slice for empty or invalid values.
+func ParseTags(raw string) []string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" || raw == "[]" || raw == "null" {
+		return []string{}
+	}
+	var tags []string
+	if err := json.Unmarshal([]byte(raw), &tags); err != nil {
+		return []string{}
+	}
+	return tags
 }
 
-func GetLabelForType(assetType string) string {
-	for _, at := range AssetTypes {
-		if at[0] == assetType {
-			return at[1]
+// EncodeTags encodes a []string into the JSON format PocketBase expects.
+func EncodeTags(tags []string) string {
+	if len(tags) == 0 {
+		return "[]"
+	}
+	b, err := json.Marshal(tags)
+	if err != nil {
+		return "[]"
+	}
+	return string(b)
+}
+
+// TagContains reports whether the raw JSON tag string contains the given tag.
+func TagContains(raw string, tag string) bool {
+	for _, t := range ParseTags(raw) {
+		if t == tag {
+			return true
 		}
 	}
+	return false
+}
 
-	return "Unknown"
+// JoinTags returns a comma-separated string of tags, or a fallback if empty.
+func JoinTags(raw string, empty string) string {
+	tags := ParseTags(raw)
+	if len(tags) == 0 {
+		return empty
+	}
+	return strings.Join(tags, ", ")
+}
+
+var AssetTags = []string{
+	"Renda Fixa",
+	"Renda Variavel",
+	"Fundos",
+	"Acoes",
+	"FII",
+	"Tesouro",
+	"CDB",
+	"Reserva Emergencia",
+	"Previdencia",
 }
 
 type AssetAggregate struct {
 	Id           string
 	Name         string
-	Type         string
+	Tag          string
 	Wallet       string
 	WalletName   string
 	InitialPrice float32
@@ -38,18 +80,18 @@ type Summary struct {
 	Total      float32
 	Aggregates []AssetAggregate
 
-	AssetTypes   [][]string
-	SelectedType string
-
 	Wallets        [][]string
 	SelectedWallet string
+
+	AssetTags   []string
+	SelectedTag string
 
 	Aggregation string
 }
 
 type NewAssetOptions struct {
-	AssetTypes [][]string
-	Wallets    [][]string
+	AssetTags []string
+	Wallets   [][]string
 }
 
 type Asset struct {
@@ -57,7 +99,7 @@ type Asset struct {
 	Created      string
 	Updated      string
 	Name         string
-	Type         string
+	Tag          string
 	Wallet       string
 	Comment      string // nullable
 	InitialPrice float32
@@ -66,13 +108,13 @@ type Asset struct {
 }
 
 type AssetCreateDTO struct {
-	Name         string  `form:"name"`
-	Type         string  `form:"type"`
-	Wallet       string  `form:"wallet"`
-	Comment      string  `form:"comment"` // nullable
-	InitialPrice float32 `form:"initial_price"`
-	BuyDate      string  `form:"buy_date"`
-	SellDate     string  `form:"sell_date"` // nullable
+	Name         string   `form:"name"`
+	Tags         []string `form:"tags"` // multi-select; encoded to JSON before storing
+	Wallet       string   `form:"wallet"`
+	Comment      string   `form:"comment"` // nullable
+	InitialPrice float32  `form:"initial_price"`
+	BuyDate      string   `form:"buy_date"`
+	SellDate     string   `form:"sell_date"` // nullable
 }
 
 type AssetUpdateDTO struct {
@@ -80,7 +122,7 @@ type AssetUpdateDTO struct {
 	SellDate string `form:"sell_date"` // nullable
 }
 
-var AssetFields = []string{"id", "created", "updated", "name", "type", "wallet", "comment", "initial_price", "buy_date", "sell_date"}
+var AssetFields = []string{"id", "created", "updated", "name", "wallet", "comment", "initial_price", "buy_date", "sell_date"}
 
 var EmptyAsset = Asset{}
 
@@ -96,7 +138,7 @@ func CreateNewAsset(dto AssetCreateDTO) Asset {
 		Created:      GenerateTimestamp(),
 		Updated:      GenerateTimestamp(),
 		Name:         dto.Name,
-		Type:         dto.Type,
+		Tag:          EncodeTags(dto.Tags),
 		Wallet:       dto.Wallet,
 		Comment:      dto.Comment,
 		InitialPrice: dto.InitialPrice,

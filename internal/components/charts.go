@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fintracker/internal/models"
 	"fintracker/internal/urls"
+	"fintracker/internal/utils"
 	"fmt"
 	"io"
+	"sort"
 	"time"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
@@ -26,20 +28,15 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 	page := components.NewPage().SetAssetsHost(urls.StaticsURL("assets/"))
 
 	switch summary.Aggregation {
-	case "wallet":
-		walletPie := buildWalletPieChart(summary)
-		page.AddCharts(walletPie)
-	case "type":
-		typePie := buildTypePieChart(summary)
-		page.AddCharts(typePie)
+	case "tag":
+		tagsBar := buildTagsBarChart(summary)
+		page.AddCharts(tagsBar)
 	case "total":
 		totalChart := buildTotalChart(summary)
 		page.AddCharts(totalChart)
-	default:
-		// Default to showing both charts
+	default: // "wallet" or other
 		walletPie := buildWalletPieChart(summary)
-		typePie := buildTypePieChart(summary)
-		page.AddCharts(walletPie, typePie)
+		page.AddCharts(walletPie)
 	}
 
 	return page.Render(w)
@@ -47,6 +44,22 @@ func SummaryChart(summary models.Summary, w io.Writer) error {
 
 func formatCurrency(value float32) string {
 	return fmt.Sprintf("R$%.2f", value)
+}
+
+func getTagColor(tag string) string {
+	colorMap := map[string]string{
+		"blue":   "#3B82F6",
+		"green":  "#10B981",
+		"purple": "#8B5CF6",
+		"yellow": "#F59E0B",
+		"red":    "#EF4444",
+		"pink":   "#EC4899",
+		"gray":   "#6B7280",
+	}
+	if c, ok := colorMap[utils.StringToColor(tag)]; ok {
+		return c
+	}
+	return "#3B82F6"
 }
 
 func buildWalletPieChart(summary models.Summary) *charts.Pie {
@@ -61,12 +74,23 @@ func buildWalletPieChart(summary models.Summary) *charts.Pie {
 		}
 	}
 
-	walletItems := make([]opts.PieData, 0)
+	type walletItem struct {
+		name  string
+		value float32
+	}
+	walletSlice := make([]walletItem, 0)
 	for wallet, value := range walletMap {
 		if value == 0.0 {
 			continue
 		}
-		walletItems = append(walletItems, opts.PieData{Name: wallet, Value: value})
+		walletSlice = append(walletSlice, walletItem{name: wallet, value: value})
+	}
+	sort.Slice(walletSlice, func(i, j int) bool {
+		return walletSlice[i].value > walletSlice[j].value
+	})
+	walletItems := make([]opts.PieData, 0, len(walletSlice))
+	for _, w := range walletSlice {
+		walletItems = append(walletItems, opts.PieData{Name: w.name, Value: w.value})
 	}
 
 	walletPie := charts.NewPie()
@@ -101,58 +125,6 @@ func buildWalletPieChart(summary models.Summary) *charts.Pie {
 	return walletPie
 }
 
-func buildTypePieChart(summary models.Summary) *charts.Pie {
-	typeMap := make(map[string]float32)
-	for _, assetType := range summary.AssetTypes {
-		typeMap[assetType[0]] = 0.0
-	}
-
-	for _, asset := range summary.Aggregates {
-		if _, ok := typeMap[asset.Type]; ok {
-			typeMap[asset.Type] += asset.LastPrice
-		}
-	}
-
-	typeItems := make([]opts.PieData, 0)
-	for assetType, value := range typeMap {
-		if value == 0.0 {
-			continue
-		}
-		typeItems = append(typeItems, opts.PieData{Name: models.GetLabelForType(assetType), Value: value})
-	}
-
-	typePie := charts.NewPie()
-	typePie.SetGlobalOptions(
-		charts.WithLegendOpts(opts.Legend{
-			Show: opts.Bool(false),
-		}),
-		charts.WithInitializationOpts(opts.Initialization{
-			Theme:           types.ThemeWonderland,
-			BackgroundColor: "#0F172A",
-			Height:          "400px",
-		}),
-		charts.WithTitleOpts(opts.Title{
-			Title:    "Portifolio By Asset Type",
-			Subtitle: "Total: " + formatCurrency(summary.Total),
-			TitleStyle: &opts.TextStyle{
-				Color: "#E2E8F0",
-			},
-			SubtitleStyle: &opts.TextStyle{
-				Color: "#94A3B8",
-			},
-		}),
-	)
-
-	typePie.AddSeries("radius", typeItems,
-		charts.WithLabelOpts(opts.Label{
-			Show:      opts.Bool(true),
-			Formatter: "{b}: R${c}",
-		}),
-	)
-
-	return typePie
-}
-
 func buildTotalChart(summary models.Summary) *charts.Pie {
 	totalPie := charts.NewPie()
 	totalPie.SetGlobalOptions(
@@ -184,6 +156,80 @@ func buildTotalChart(summary models.Summary) *charts.Pie {
 	)
 
 	return totalPie
+}
+
+func buildTagsBarChart(summary models.Summary) *charts.Bar {
+	tagMap := make(map[string]float32)
+
+	for _, asset := range summary.Aggregates {
+		tags := models.ParseTags(asset.Tag)
+		for _, tag := range tags {
+			tagMap[tag] += asset.LastPrice
+		}
+	}
+
+	type tagItem struct {
+		name  string
+		value float32
+		color string
+	}
+	tagSlice := make([]tagItem, 0, len(tagMap))
+	for tag, value := range tagMap {
+		tagSlice = append(tagSlice, tagItem{name: tag, value: value, color: getTagColor(tag)})
+	}
+	sort.Slice(tagSlice, func(i, j int) bool {
+		return tagSlice[i].value > tagSlice[j].value
+	})
+
+	tagNames := make([]string, 0, len(tagSlice))
+	tagValues := make([]opts.BarData, 0, len(tagSlice))
+	for _, t := range tagSlice {
+		tagNames = append(tagNames, t.name)
+		tagValues = append(tagValues, opts.BarData{
+			Value:     t.value,
+			ItemStyle: &opts.ItemStyle{Color: t.color},
+		})
+	}
+
+	tagsBar := charts.NewBar()
+	tagsBar.SetGlobalOptions(
+		charts.WithInitializationOpts(opts.Initialization{
+			Theme:           types.ThemeWonderland,
+			BackgroundColor: "#0F172A",
+			Height:          "400px",
+		}),
+		charts.WithTitleOpts(opts.Title{
+			Title:    "Portfolio By Tags",
+			Subtitle: "Total: " + formatCurrency(summary.Total),
+			TitleStyle: &opts.TextStyle{
+				Color: "#E2E8F0",
+			},
+			SubtitleStyle: &opts.TextStyle{
+				Color: "#94A3B8",
+			},
+		}),
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
+		}),
+		charts.WithXAxisOpts(opts.XAxis{
+			Type: "value",
+		}),
+		charts.WithYAxisOpts(opts.YAxis{
+			Type:    "category",
+			Data:    tagNames,
+			Inverse: opts.Bool(true),
+		}),
+	)
+
+	tagsBar.AddSeries("Tags", tagValues,
+		charts.WithLabelOpts(opts.Label{
+			Show:      opts.Bool(true),
+			Formatter: "R${c}",
+			Position:  "right",
+		}),
+	)
+
+	return tagsBar
 }
 
 var DATE_LAYOUT = "2006-01-02"

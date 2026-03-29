@@ -25,17 +25,17 @@ func setupScopedAssetsRoutes(group *router.RouterGroup[*core.RequestEvent], c co
 
 func assetRedirect(e *core.RequestEvent) error {
 	wallet := e.Request.URL.Query().Get(urls.WalletQueryParam)
-	asset_type := e.Request.URL.Query().Get(urls.TypeQueryParam)
-	e.Response.Header().Set("HX-Redirect", urls.AssetsURLWithQuery(wallet, asset_type))
+	tag := e.Request.URL.Query().Get(urls.TagQueryParam)
+	e.Response.Header().Set("HX-Redirect", urls.AssetsURLWithQuery(wallet, tag))
 	return e.JSON(200, map[string]any{"success": true})
 }
 
 func assetList(c controllers.Controllers, e *core.RequestEvent) error {
 	walletFilter := e.Request.URL.Query().Get(urls.WalletQueryParam)
-	typeFilter := e.Request.URL.Query().Get(urls.TypeQueryParam)
+	tagFilter := e.Request.URL.Query().Get(urls.TagQueryParam)
 	userId := e.Get(userIdStoreKey).(string)
 
-	summary, err := c.Asset.SummarizeAssets(userId, walletFilter, typeFilter)
+	summary, err := c.Asset.SummarizeAssets(userId, walletFilter, tagFilter)
 	if err != nil {
 		return err
 	}
@@ -66,9 +66,6 @@ func accountSummary(c controllers.Controllers, e *core.RequestEvent) error {
 }
 
 func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
-	// TODO: init popup with selected fiels based in query
-	// wallet := e.Request.URL.Query().Get(urls.WalletQueryParam)
-	// asset_type := e.Request.URL.Query().Get(urls.TypeQueryParam)
 	userId := e.Get(userIdStoreKey).(string)
 
 	options, err := c.Asset.GetAssetOptions(userId)
@@ -79,7 +76,7 @@ func assetCreatePopup(c controllers.Controllers, e *core.RequestEvent) error {
 	return sendPage(e, components.NewAsset(options))
 }
 
-// missing wallet scope chec
+// missing wallet scope check
 func assetCreate(c controllers.Controllers, e *core.RequestEvent) error {
 	userId := e.Get(userIdStoreKey).(string)
 

@@ -15,7 +15,7 @@ var AuthenticatedUrl = "/u"
 
 // Query Parameters
 var WalletQueryParam = "wallet"
-var TypeQueryParam = "type"
+var TagQueryParam = "tag"
 var AggregationQueryParam = "aggregation"
 
 func SummaryURLWithAggregation(aggregation string) string {

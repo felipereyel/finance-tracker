@@ -4,7 +4,6 @@ type History struct {
 	Aggregation string
 	Series      []HistorySeries
 	Wallets     [][]string
-	AssetTypes  [][]string
 }
 
 type HistorySeries struct {
@@ -20,10 +19,10 @@ type HistoryDataPoint struct {
 type AssetPriceHistory struct {
 	AssetId    string
 	AssetName  string
-	AssetType  string
 	WalletId   string
 	WalletName string
 	SellDate   string
+	Tag        string
 	Prices     []Price
 }
 

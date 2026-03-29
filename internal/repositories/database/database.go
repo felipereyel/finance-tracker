@@ -132,7 +132,8 @@ func (db database) CreateAsset(asset models.Asset) error {
 	result, err := db.app.DB().Insert("assets", dbx.Params{
 		"id":            asset.Id,
 		"name":          asset.Name,
-		"type":          asset.Type,
+		"type":          "other",
+		"tag":           asset.Tag,
 		"wallet":        asset.Wallet,
 		"initial_price": asset.InitialPrice,
 		"buy_date":      asset.BuyDate,
@@ -182,7 +183,7 @@ func (db database) UpdateAsset(asset models.Asset) error {
 
 func (db database) GetAssetById(assetId string) (models.Asset, error) {
 	var asset models.Asset
-	if err := db.app.DB().Select("id", "name", "type", "wallet", "initial_price", "buy_date", "sell_date", "comment", "created", "updated").From("assets").Where(dbx.HashExp{"id": assetId}).One(&asset); err != nil {
+	if err := db.app.DB().Select("id", "name", "tag", "wallet", "initial_price", "buy_date", "sell_date", "comment", "created", "updated").From("assets").Where(dbx.HashExp{"id": assetId}).One(&asset); err != nil {
 		return models.Asset{}, err
 	}
 
@@ -195,7 +196,7 @@ var AssetAggregatesSelectFragment = `
 	SELECT
 		a.id,
 		a.name,
-		a.type,
+		a.tag,
 		a.wallet,
 		w.name as wallet_name,
 		a.initial_price,
@@ -312,9 +313,9 @@ func (db database) GetHistoricalPrices(userId string) ([]models.AssetPriceHistor
 		SELECT
 			a.id as asset_id,
 			a.name as asset_name,
-			a.type as asset_type,
 			a.wallet as wallet_id,
 			a.sell_date as sell_date,
+			a.tag as tag,
 			w.name as wallet_name
 		FROM assets a
 		INNER JOIN wallets w ON a.wallet = w.id
@@ -325,9 +326,9 @@ func (db database) GetHistoricalPrices(userId string) ([]models.AssetPriceHistor
 	type AssetInfo struct {
 		AssetId    string `db:"asset_id"`
 		AssetName  string `db:"asset_name"`
-		AssetType  string `db:"asset_type"`
 		WalletId   string `db:"wallet_id"`
 		SellDate   string `db:"sell_date"`
+		Tag        string `db:"tag"`
 		WalletName string `db:"wallet_name"`
 	}
 
@@ -348,10 +349,10 @@ func (db database) GetHistoricalPrices(userId string) ([]models.AssetPriceHistor
 		history := models.AssetPriceHistory{
 			AssetId:    info.AssetId,
 			AssetName:  info.AssetName,
-			AssetType:  info.AssetType,
 			WalletId:   info.WalletId,
 			WalletName: info.WalletName,
 			SellDate:   info.SellDate,
+			Tag:        info.Tag,
 			Prices:     prices,
 		}
 

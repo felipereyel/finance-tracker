@@ -26,7 +26,6 @@ func (h historyController) GetHistory(userId string, aggregation string) (models
 		Aggregation: aggregation,
 		Series:      make([]models.HistorySeries, 0),
 		Wallets:     make([][]string, 0),
-		AssetTypes:  models.AssetTypes,
 	}
 
 	for _, wallet := range wallets {
@@ -53,8 +52,8 @@ func (h historyController) GetHistory(userId string, aggregation string) (models
 	case "wallet":
 		series := h.buildWalletSeries(sortedDates, histories)
 		history.Series = series
-	case "type":
-		series := h.buildTypeSeries(sortedDates, histories)
+	case "tag":
+		series := h.buildTagsSeries(sortedDates, histories)
 		history.Series = series
 	default:
 		series := h.buildTotalSeries(sortedDates, histories)
@@ -128,25 +127,28 @@ func (h historyController) buildWalletSeries(dates []string, histories []models.
 	return seriesList
 }
 
-func (h historyController) buildTypeSeries(dates []string, histories []models.AssetPriceHistory) []models.HistorySeries {
-	typeHistories := make(map[string][]models.AssetPriceHistory)
+func (h historyController) buildTagsSeries(dates []string, histories []models.AssetPriceHistory) []models.HistorySeries {
+	tagHistories := make(map[string][]models.AssetPriceHistory)
 
 	for _, hist := range histories {
-		typeHistories[hist.AssetType] = append(typeHistories[hist.AssetType], hist)
+		tags := models.ParseTags(hist.Tag)
+		for _, tag := range tags {
+			tagHistories[tag] = append(tagHistories[tag], hist)
+		}
 	}
 
 	var seriesList []models.HistorySeries
 
-	for assetType, typeAssets := range typeHistories {
+	for tagName, tagAssets := range tagHistories {
 		series := models.HistorySeries{
-			Name:   models.GetLabelForType(assetType),
+			Name:   tagName,
 			Points: make([]models.HistoryDataPoint, 0),
 		}
 
 		for _, date := range dates {
 			totalValue := float32(0)
 
-			for _, assetHistory := range typeAssets {
+			for _, assetHistory := range tagAssets {
 				latestPrice := h.getLatestPriceAtDate(assetHistory, date)
 				if latestPrice != nil {
 					totalValue += latestPrice.Value
@@ -160,6 +162,27 @@ func (h historyController) buildTypeSeries(dates []string, histories []models.As
 		}
 
 		seriesList = append(seriesList, series)
+	}
+
+	// Sort by total value at the latest date (highest first)
+	if len(dates) > 0 {
+		lastDate := dates[len(dates)-1]
+		sort.Slice(seriesList, func(i, j int) bool {
+			var valI, valJ float32
+			for _, p := range seriesList[i].Points {
+				if p.Date == lastDate {
+					valI = p.Value
+					break
+				}
+			}
+			for _, p := range seriesList[j].Points {
+				if p.Date == lastDate {
+					valJ = p.Value
+					break
+				}
+			}
+			return valI > valJ
+		})
 	}
 
 	return seriesList

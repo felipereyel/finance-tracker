@@ -49,6 +49,46 @@ templ selectInput(param string, options [][]string, selected string) {
 	</select>
 }
 
+templ selectTagFilterInput(options []string, selected string) {
+	<select id={ urls.TagQueryParam } name={ urls.TagQueryParam } class="bg-gray-50 p-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+		if selected == "" {
+			<option value="" selected>All tags</option>
+		} else {
+			<option value="">All tags</option>
+		}
+		for _, tag := range options {
+			if tag == selected {
+				<option value={ tag } selected>{ tag }</option>
+			} else {
+				<option value={ tag }>{ tag }</option>
+			}
+		}
+	</select>
+}
+
+templ tagsDisplay(rawTag string) {
+	<div class="flex flex-row flex-wrap gap-1">
+		for _, tag := range models.ParseTags(rawTag) {
+			@spanTagOutline(tag, utils.StringToColor(tag))
+		}
+	</div>
+}
+
+templ multiSelectTagInput(options []string, selectedRaw string) {
+	<div class="flex flex-col gap-1">
+		for _, tag := range options {
+			<label class="flex items-center gap-2 text-sm text-gray-900 dark:text-white cursor-pointer">
+				if models.TagContains(selectedRaw, tag) {
+					<input type="checkbox" name="tags" value={ tag } checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+				} else {
+					<input type="checkbox" name="tags" value={ tag } class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+				}
+				{ tag }
+			</label>
+		}
+	</div>
+}
+
 templ AssetSummaryPage(summary models.Summary) {
 	@rawPage("Assets List") {
 		<div class="px-4 sm:px-8 m-auto pt-2">
@@ -70,8 +110,8 @@ templ AssetSummaryPage(summary models.Summary) {
 							New Asset
 						</button>
 						<form class="flex flex-row justify-between items-center gap-4" hx-trigger="change" hx-get={ urls.AssetsRedirectURL } hx-target="this" hx-push-url="true">
-							@selectInput(urls.TypeQueryParam, summary.AssetTypes, summary.SelectedType)
 							@selectInput(urls.WalletQueryParam, summary.Wallets, summary.SelectedWallet)
+							@selectTagFilterInput(summary.AssetTags, summary.SelectedTag)
 						</form>
 					</div>
 				</div>
@@ -82,12 +122,12 @@ templ AssetSummaryPage(summary models.Summary) {
 								<th scope="col" class="px-6 py-3">
 									Name
 								</th>
-								<th scope="col" class="px-6 py-3">
-									Wallet
-								</th>
-								<th scope="col" class="px-6 py-3">
-									Type
-								</th>
+							<th scope="col" class="px-6 py-3">
+								Wallet
+							</th>
+							<th scope="col" class="px-6 py-3">
+								Tags
+							</th>
 								<th scope="col" class="px-6 py-3">
 									Buy Date
 								</th>
@@ -112,7 +152,7 @@ templ AssetSummaryPage(summary models.Summary) {
 										@spanTagGradientMonochrome(asset.WalletName, utils.StringToColor(asset.WalletName))
 									</td>
 									<td class="px-6 py-4">
-										@spanTagOutline(models.GetLabelForType(asset.Type), utils.StringToColor(asset.Type))
+										@tagsDisplay(asset.Tag)
 									</td>
 									<td class="px-6 py-4">{ utils.FormatDateTime(asset.BuyDate) }</td>
 									<td class="px-6 py-4">{ utils.FormatBRL(asset.InitialPrice) }</td>
@@ -145,8 +185,8 @@ templ SummaryPage(aggregation string) {
 							<a href={ urls.SummaryURLWithAggregation("wallet") } class={ "px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "wallet"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "wallet") }>
 								By Wallet
 							</a>
-							<a href={ urls.SummaryURLWithAggregation("type") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "type"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "type") }>
-								By Asset Type
+							<a href={ urls.SummaryURLWithAggregation("tag") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "tag"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "tag") }>
+								By Tags
 							</a>
 							<a href={ urls.SummaryURLWithAggregation("total") } class={ "px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "total" || aggregation == ""), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "total" && aggregation != "") }>
 								Total
@@ -195,14 +235,6 @@ templ NewAsset(summary models.NewAssetOptions) {
 									<option value={ option[0] }>{ option[1] }</option>
 								}
 							</select>
-							<label for="type" class="block text-sm font-medium text-gray-900 dark:text-white">
-								Asset Type
-							</label>
-							<select name="type" id="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
-								for _, option := range summary.AssetTypes {
-									<option value={ option[0] }>{ option[1] }</option>
-								}
-							</select>
 							<label for="initial_price" class="block text-sm font-medium text-gray-900 dark:text-white">
 								Initial Price
 							</label>
@@ -215,6 +247,10 @@ templ NewAsset(summary models.NewAssetOptions) {
 								Comment
 							</label>
 							<textarea name="comment" id="comment" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"></textarea>
+							<label class="block text-sm font-medium text-gray-900 dark:text-white">
+								Tags
+							</label>
+							@multiSelectTagInput(summary.AssetTags, "")
 						</div>
 						<button type="submit" class="w-full text-white text-center px-4 py-2 bg-blue-600 hover:bg-sky-100 hover:text-sky-900 border border-slate-600 rounded overflow-hidden shadow-md">
 							Add
@@ -268,10 +304,10 @@ templ AssetDetailsPage(summary models.AssetAggregate) {
 								<input name="wallet" id="wallet" type="text" value={ summary.WalletName } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
 							</div>
 							<div class="flex flex-col gap-2 w-1/2">
-								<label for="type" class="block text-sm font-medium text-gray-900 dark:text-white">
-									Asset Type
+								<label class="block text-sm font-medium text-gray-900 dark:text-white">
+									Tags
 								</label>
-								<input name="type" id="type" type="text" value={ models.GetLabelForType(summary.Type) } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
+								<input type="text" value={ models.JoinTags(summary.Tag, "No tags") } class="cursor-not-allowed bg-gray-50 border-dashed border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" disabled/>
 							</div>
 						</div>
 						<div class="flex flex-row gap-4">
@@ -472,8 +508,8 @@ templ HistoryPage(aggregation string) {
 							<a href={ urls.HistoryURLWithAggregation("wallet") } class={ "px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "wallet"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "wallet") }>
 								By Wallet
 							</a>
-							<a href={ urls.HistoryURLWithAggregation("type") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "type"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "type") }>
-								By Asset Type
+							<a href={ urls.HistoryURLWithAggregation("tag") } class={ "px-4 py-2 text-sm font-medium border-t border-b focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "tag"), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "tag") }>
+								By Tags
 							</a>
 							<a href={ urls.HistoryURLWithAggregation("total") } class={ "px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:focus:ring-blue-500 dark:focus:text-white", templ.KV("bg-blue-600 text-white dark:bg-blue-600 dark:text-white", aggregation == "total" || aggregation == ""), templ.KV("bg-white text-gray-900 dark:bg-gray-800 dark:text-white hover:bg-gray-100 hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700", aggregation != "total" && aggregation != "") }>
 								Total
